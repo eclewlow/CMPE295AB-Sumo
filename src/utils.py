@@ -63,10 +63,10 @@ def change_lane(vid, lane):
     :param lane: lane index
     """
     traci.vehicle.setLaneChangeMode(vid, FIX_LC)
-    traci.vehicle.changeLane(vid, lane, 1000000)
+    traci.vehicle.changeLane(vid, lane, 1000000.0)
 
 
-def add_vehicle(vid, position, lane, speed, cacc_spacing, real_engine=False):
+def add_vehicle(vid, position, lane, speed, cacc_spacing, real_engine=False, type_id='PlatoonCar'):
     """
     Adds a vehicle to the simulation
     :param vid: vehicle id to be set
@@ -80,8 +80,8 @@ def add_vehicle(vid, position, lane, speed, cacc_spacing, real_engine=False):
     # traci.vehicle.add(vid, "platoon_route",
     #                   pos=position, speed=speed, lane=lane,
     #                   typeID="vtypeauto")
-    traci.vehicle.add(vehID=vid, routeID='platoon_route', departPos=str(position), departSpeed=str(speed),
-                      departLane=str(lane), typeID='default')
+    traci.vehicle.add(vehID=vid, routeID='freeway', departPos=str(position), departSpeed=str(speed),
+                      departLane=str(lane), typeID=type_id)
     set_par(vid, cc.CC_PAR_CACC_C1, 0.5)
     set_par(vid, cc.CC_PAR_CACC_XI, 2)
     set_par(vid, cc.CC_PAR_CACC_OMEGA_N, 1)
@@ -105,9 +105,9 @@ def get_distance(v1, v2):
     :return: distance between v1 and v2
     """
     v_data = get_par(v1, cc.PAR_SPEED_AND_ACCELERATION)
-    (v, a, u, x1, y1, t) = cc.unpack(v_data)
+    (v, a, u, x1, y1, t, _, _, _) = cc.unpack(v_data)
     v_data = get_par(v2, cc.PAR_SPEED_AND_ACCELERATION)
-    (v, a, u, x2, y2, t) = cc.unpack(v_data)
+    (v, a, u, x2, y2, t, _, _, _) = cc.unpack(v_data)
     return math.sqrt((x1 - x2)**2 + (y1 - y2)**2) - 4
 
 
@@ -119,14 +119,14 @@ def communicate(topology):
     vehicle and platoon leader. each entry of the dictionary is a dictionary
     which includes the keys "leader" and "front"
     """
-    for vid, links in topology.iteritems():
+    for vid, links in topology.items():
         # get data about platoon leader
         leader_data = get_par(links["leader"], cc.PAR_SPEED_AND_ACCELERATION)
-        (l_v, l_a, l_u, l_x, l_y, l_t) = cc.unpack(leader_data)
+        (l_v, l_a, l_u, l_x, l_y, l_t, _, _, _) = cc.unpack(leader_data)
         leader_data = cc.pack(l_v, l_u, l_x, l_y, l_t)
         # get data about front vehicle
         front_data = get_par(links["front"], cc.PAR_SPEED_AND_ACCELERATION)
-        (f_v, f_a, f_u, f_x, f_y, f_t) = cc.unpack(front_data)
+        (f_v, f_a, f_u, f_x, f_y, f_t, _, _, _) = cc.unpack(front_data)
         front_data = cc.pack(f_v, f_u, f_x, f_y, f_t)
         # pass leader and front vehicle data to CACC
         set_par(vid, cc.PAR_LEADER_SPEED_AND_ACCELERATION, leader_data)
