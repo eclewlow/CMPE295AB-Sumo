@@ -59,6 +59,7 @@ COMPLETED = 2
 FRONT_CHANGING_LANES = 3
 FRONT_SPEED_UP = 4
 REAR_CHANGING_LANES = 5
+MERGE_PLATOONS = 6
 
 # maneuver actors
 LEADER = "v.0"
@@ -149,12 +150,14 @@ def front_speed_up(topology):
     return topology
 
 
-def reset_leader(vid, topology, n):
+def merge_platoons(vid, fid, topology, n):
+    leader_id = topology[fid]["leader"]
+
     index = int(vid.split(".")[1])
     for i in range(index, n):
         # temporarily change the leader
-        topology["v.%d" % i]["leader"] = LEADER
-    topology[vid]["front"] = FRONT_JOIN
+        topology["v.%d" % i]["leader"] = leader_id
+    topology[vid]["front"] = fid
     return topology
 
 
@@ -165,6 +168,15 @@ def can_change_lane(leader_id, direction, n):
         vid = "v.%d" % i
         result = result and traci.vehicle.couldChangeLane(vid, direction)
     return result
+
+def platoon_ahead(vid, topology):
+    result = traci.vehicle.getLeader(BEHIND_JOIN)
+    if result is None:
+        return None
+    lid, dist = result
+    if lid in topology:
+        return lid
+
 
 
 def record_data_points():
@@ -202,6 +214,7 @@ def main(demo_mode, real_engine, setter=None):
         if step % 10 == 1:
             communicate(topology)
             record_data_points()
+            # print(traci.vehicle.getDistance('v.0'))
         if step == 100:
             state = GOING_TO_POSITION
             topology = get_in_position('v.0', LEFT_SLOW_VEHICLE, topology)
@@ -226,8 +239,12 @@ def main(demo_mode, real_engine, setter=None):
             for i in range(JOIN_POSITION, N_VEHICLES):
                 vid = f'v.{i}'
                 change_lane(vid, 0)
-            topology = reset_leader(BEHIND_JOIN, topology, N_VEHICLES)
-            state = COMPLETED
+            state = MERGE_PLATOONS
+        if state == MERGE_PLATOONS:
+            fid = platoon_ahead(BEHIND_JOIN, topology)
+            if fid is not None:
+                merge_platoons(BEHIND_JOIN, fid, topology, N_VEHICLES)
+                state = COMPLETED
 
         step += 1
 
