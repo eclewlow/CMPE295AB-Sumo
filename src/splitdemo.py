@@ -123,7 +123,7 @@ def get_in_position(vid, lid, topology):
     return topology
 
 
-def open_gap(vid, jid, topology, n):
+def split_platoon(vid, jid, topology, n):
     index = int(vid.split(".")[1])
     for i in range(index + 1, n):
         topology["v.%d" % i]["leader"] = vid
@@ -171,7 +171,7 @@ def can_change_lane(leader_id, direction, n):
     return result
 
 def platoon_ahead(vid, topology):
-    result = traci.vehicle.getLeader(BEHIND_JOIN)
+    result = traci.vehicle.getLeader(vid)
     if result is None:
         return None
     lid, dist = result
@@ -217,7 +217,7 @@ def main(demo_mode, real_engine, setter=None):
         if state == GOING_TO_POSITION:
             if get_distance('v.0', LEFT_SLOW_VEHICLE) < JOIN_DISTANCE + 1:
                 state = FRONT_CHANGING_LANES
-                topology = open_gap(BEHIND_JOIN, FRONT_JOIN, topology, N_VEHICLES)
+                topology = split_platoon(BEHIND_JOIN, FRONT_JOIN, topology, N_VEHICLES)
         if state == FRONT_CHANGING_LANES:
             if can_change_lane(LEADER, -1, JOIN_POSITION):
                 for i in range(JOIN_POSITION):
