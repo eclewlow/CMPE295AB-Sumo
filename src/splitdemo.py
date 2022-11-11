@@ -75,6 +75,7 @@ RIGHT_SLOW_VEHICLE = "v.%d" % (N_VEHICLES + 2)
 sumoBinary = sumolib.checkBinary('sumo-gui')
 sumoCmd = [sumoBinary, "-D", "-c", "cfg/freeway_test.sumocfg"]
 
+# for plots / graphs
 x = defaultdict(list)
 y_accel = defaultdict(list)
 y_vel = defaultdict(list)
@@ -198,23 +199,18 @@ def main(demo_mode, real_engine, setter=None):
     state = FIRST_STATE
     while running(demo_mode, step, 4000):
 
-        # when reaching 60 seconds, reset the simulation when in demo_mode
-        if demo_mode and step == 6000:
-            start_sumo("cfg/freeway_test.sumocfg", True)
-            step = 0
-            state = GOING_TO_POSITION
-            random.seed(1)
-
         traci.simulationStep()
 
+        # first step, add vehicles
         if step == 0:
             topology = add_vehicles(N_VEHICLES, real_engine)
             traci.gui.trackVehicle("View #0", LEFT_SLOW_VEHICLE)
             traci.gui.setZoom("View #0", 20000)
+        # every 100ms, update CACC and record data points for plot/graph
         if step % 10 == 1:
             communicate(topology)
             record_data_points()
-            # print(traci.vehicle.getDistance('v.0'))
+        # at one second, begin phase 'approaching vehicles'
         if step == 100:
             state = GOING_TO_POSITION
             topology = get_in_position('v.0', LEFT_SLOW_VEHICLE, topology)
