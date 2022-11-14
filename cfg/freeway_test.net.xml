@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2022-04-12 20:56:48 by Eclipse SUMO netedit Version 1.12.0
+<!-- generated on 2022-11-13 19:49:57 by Eclipse SUMO netedit Version 1.13.0
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
 
     <input>
@@ -41,31 +41,36 @@
     <location netOffset="0.00,0.00" convBoundary="-25000.00,50.00,26000.00,50.00" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00" projParameter="!"/>
 
     <edge id=":n2_0" function="internal">
-        <lane id=":n2_0_0" index="0" speed="37.30" length="8.81" shape="24996.00,45.20 24998.46,44.70 25000.00,43.60 25001.54,42.50 25004.00,42.00"/>
-        <lane id=":n2_0_1" index="1" speed="37.30" length="8.81" shape="24996.00,48.40 24998.46,47.90 25000.00,46.80 25001.54,45.70 25004.00,45.20"/>
+        <lane id=":n2_0_0" index="0" speed="37.30" length="0.10" shape="25000.00,42.00 25000.00,42.00"/>
+        <lane id=":n2_0_1" index="1" speed="37.30" length="0.10" shape="25000.00,45.20 25000.00,45.20"/>
+        <lane id=":n2_0_2" index="2" speed="37.30" length="0.10" shape="25000.00,48.40 25000.00,48.40"/>
     </edge>
 
     <edge id="exit" from="n2" to="n3" priority="-1">
-        <lane id="exit_0" index="0" speed="37.30" length="996.00" shape="25004.00,42.00 26000.00,42.00"/>
-        <lane id="exit_1" index="1" speed="37.30" length="996.00" shape="25004.00,45.20 26000.00,45.20"/>
-        <lane id="exit_2" index="2" speed="37.30" length="996.00" shape="25004.00,48.40 26000.00,48.40"/>
+        <lane id="exit_0" index="0" speed="37.30" length="1000.00" shape="25000.00,42.00 26000.00,42.00"/>
+        <lane id="exit_1" index="1" speed="37.30" length="1000.00" shape="25000.00,45.20 26000.00,45.20"/>
+        <lane id="exit_2" index="2" speed="37.30" length="1000.00" shape="25000.00,48.40 26000.00,48.40"/>
     </edge>
     <edge id="freeway" from="n1" to="n2" priority="-1">
-        <lane id="freeway_0" index="0" speed="37.30" length="49996.00" shape="-25000.00,45.20 24996.00,45.20"/>
-        <lane id="freeway_1" index="1" speed="37.30" length="49996.00" shape="-25000.00,48.40 24996.00,48.40"/>
+        <lane id="freeway_0" index="0" speed="37.30" length="50000.00" shape="-25000.00,42.00 25000.00,42.00"/>
+        <lane id="freeway_1" index="1" speed="37.30" length="50000.00" shape="-25000.00,45.20 25000.00,45.20"/>
+        <lane id="freeway_2" index="2" speed="37.30" length="50000.00" shape="-25000.00,48.40 25000.00,48.40"/>
     </edge>
 
-    <junction id="n1" type="dead_end" x="-25000.00" y="50.00" incLanes="" intLanes="" shape="-25000.00,50.00 -25000.00,43.60"/>
-    <junction id="n2" type="priority" x="25000.00" y="50.00" incLanes="freeway_0 freeway_1" intLanes=":n2_0_0 :n2_0_1" shape="25004.00,50.00 25004.00,40.40 25000.97,41.23 24999.03,42.77 24997.79,43.36 24996.00,43.60 24996.00,50.00">
-        <request index="0" response="00" foes="00" cont="0"/>
-        <request index="1" response="00" foes="00" cont="0"/>
+    <junction id="n1" type="dead_end" x="-25000.00" y="50.00" incLanes="" intLanes="" shape="-25000.00,50.00 -25000.00,40.40"/>
+    <junction id="n2" type="priority" x="25000.00" y="50.00" incLanes="freeway_0 freeway_1 freeway_2" intLanes=":n2_0_0 :n2_0_1 :n2_0_2" shape="25000.00,50.00 25000.00,40.40 25000.00,50.00">
+        <request index="0" response="000" foes="000" cont="0"/>
+        <request index="1" response="000" foes="000" cont="0"/>
+        <request index="2" response="000" foes="000" cont="0"/>
     </junction>
     <junction id="n3" type="dead_end" x="26000.00" y="50.00" incLanes="exit_0 exit_1 exit_2" intLanes="" shape="26000.00,40.40 26000.00,50.00"/>
 
     <connection from="freeway" to="exit" fromLane="0" toLane="0" via=":n2_0_0" dir="s" state="M"/>
     <connection from="freeway" to="exit" fromLane="1" toLane="1" via=":n2_0_1" dir="s" state="M"/>
+    <connection from="freeway" to="exit" fromLane="2" toLane="2" via=":n2_0_2" dir="s" state="M"/>
 
     <connection from=":n2_0" to="exit" fromLane="0" toLane="0" dir="s" state="M"/>
     <connection from=":n2_0" to="exit" fromLane="1" toLane="1" dir="s" state="M"/>
+    <connection from=":n2_0" to="exit" fromLane="2" toLane="2" dir="s" state="M"/>
 
 </net>

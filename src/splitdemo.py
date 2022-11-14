@@ -92,7 +92,6 @@ def add_vehicles(n, real_engine=False):
         if i == 0:
             set_par(vid, cc.PAR_ACTIVE_CONTROLLER, cc.FAKED_CACC)
             set_par(vid, cc.PAR_CC_DESIRED_SPEED, SPEED)
-            pass
         else:
             set_par(vid, cc.PAR_ACTIVE_CONTROLLER, cc.CACC)
         if i > 0:
