@@ -73,7 +73,7 @@ def test_add_slow_vehicle_and_require_overtake(request):
     slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=18 * (Vehicle.DISTANCE + Vehicle.LENGTH),
                                             vehicle_start_lane=2, vehicle_start_speed=30)
 
-    simulation.set_simulation_time_length(60)  # end simulation after 10 seconds
+    simulation.set_simulation_time_length(60)  # end simulation after 60 seconds
 
     simulation.set_zoom(20000)
     simulation.track_vehicle(platoon)
@@ -94,7 +94,7 @@ def test_unable_to_split(request):
     slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=10 * (Vehicle.DISTANCE + Vehicle.LENGTH),
                                             vehicle_start_lane=2, vehicle_start_speed=30)
 
-    simulation.set_simulation_time_length(25)  # end simulation after 10 seconds
+    simulation.set_simulation_time_length(25)  # end simulation after 25 seconds
 
     simulation.set_zoom(20000)
     simulation.track_vehicle(platoon)
@@ -115,7 +115,7 @@ def test_four_vehicle_split(request):
     slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=15 * (Vehicle.DISTANCE + Vehicle.LENGTH),
                                             vehicle_start_lane=2, vehicle_start_speed=30)
 
-    simulation.set_simulation_time_length(25)  # end simulation after 10 seconds
+    simulation.set_simulation_time_length(25)  # end simulation after 25 seconds
 
     simulation.set_zoom(20000)
     simulation.track_vehicle(platoon)
@@ -136,7 +136,7 @@ def test_three_vehicle_split(request):
     slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=14 * (Vehicle.DISTANCE + Vehicle.LENGTH),
                                             vehicle_start_lane=2, vehicle_start_speed=30)
 
-    simulation.set_simulation_time_length(25)  # end simulation after 10 seconds
+    simulation.set_simulation_time_length(25)  # end simulation after 25 seconds
 
     simulation.set_zoom(20000)
     simulation.track_vehicle(platoon)
@@ -161,7 +161,7 @@ def test_dangerous_situation(request):
                                              commands={
                                                  1000: Vehicle.CMD_CHANGE_LANE_LEFT})  # at 10 seconds change lanes
 
-    simulation.set_simulation_time_length(25)  # end simulation after 10 seconds
+    simulation.set_simulation_time_length(25)  # end simulation after 25 seconds
 
     simulation.set_zoom(20000)
     simulation.track_vehicle(platoon)
