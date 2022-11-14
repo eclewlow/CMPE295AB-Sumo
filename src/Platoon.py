@@ -23,7 +23,8 @@ import ccparams as cc
 from utils import add_vehicle, set_par, change_lane, communicate, \
     get_distance, get_par, start_sumo, running
 
-from Vehicle import vehicle_counter, is_platoon_vehicle
+from Vehicle import vehicle_counter, is_platoon_vehicle, Vehicle
+from Direction import Direction
 
 import traci
 from PlatoonManager import platoon_manager
@@ -31,14 +32,11 @@ from enum import Enum, auto
 
 
 class Platoon:
-    DEFAULT_LANE = 1
-    # vehicle length
-    LENGTH = 4
+    DEFAULT_LANE = 2
     # minimum platoon length for split - lane change maneuver
     M = 3
-
-    LEFT = 1
-    RIGHT = -1
+    # cruising speed
+    SPEED = 130 / 3.6
 
     STATE_CRUISING = auto()
     STATE_OVERTAKING = auto()
@@ -110,7 +108,6 @@ class Platoon:
         # update cacc values
         self.communicate()
 
-        print(self.get_lane())
         # check for leader vehicles
         leader, distance = self.get_leader()
 
@@ -123,21 +120,26 @@ class Platoon:
 
         if self.state == self.STATE_OVERTAKING:
             # keep checking left lane for chance to change back
-            pass
+            index = self.get_lane_change_split_index(Direction.LEFT)
+            if self.get_length() == index:
+                # the left lane can fit the whole platoon, so make the left lane change
+                self.change_lane(Direction.LEFT)
+                self.set_state(self.STATE_CRUISING)
 
         if leader is not None and not is_platoon_vehicle(leader):
             # approach vehicle
             self.set_leader(leader)
 
             # if we have approached the leading vehicle
-            if distance < self.LENGTH + 1:
+            if distance < Vehicle.LENGTH + Vehicle.DISTANCE:
 
                 # check lane change availability
-                index = self.get_lane_change_split_index()
+                index = self.get_lane_change_split_index(Direction.RIGHT)
 
                 if self.get_length() == index:
                     # no split required, just do lane change
-                    self.change_lane(self.RIGHT)
+                    self.change_lane(Direction.RIGHT)
+                    self.set_state(self.STATE_OVERTAKING)
                     pass
                 else:
                     # check if the split index
@@ -146,9 +148,10 @@ class Platoon:
                         rear_platoon = self.split(index)
                         platoon_manager.add_platoon(rear_platoon)
 
-                        self.change_lane(self.RIGHT)
+                        self.change_lane(Direction.RIGHT)
+                        self.set_state(self.STATE_OVERTAKING)
 
-    def get_lane_change_split_index(self, direction=RIGHT):
+    def get_lane_change_split_index(self, direction):
         for i, vid in enumerate(self.vehicles):
             if not traci.vehicle.couldChangeLane(vid, direction):
                 return i
@@ -162,11 +165,11 @@ class Platoon:
 
         return Platoon(speed=self.desired_speed, vehicles=rear_vehicles)
 
-    def build(self, n=6, pos=0, speed=0, lane=DEFAULT_LANE, real_engine=False):
+    def build(self, n=6, pos=0, speed=SPEED, lane=DEFAULT_LANE):
         for i in range(n):
             vid = vehicle_counter.get_next_vehicle_id()
             self.vehicles.append(vid)
-            add_vehicle(vid, (n - i + 1) * (pos + self.LENGTH) + 50, 1, speed, pos, real_engine)
+            add_vehicle(vid, pos - i * (Vehicle.DISTANCE + Vehicle.LENGTH), 0, speed, Vehicle.DISTANCE)
             change_lane(vid, lane)
             if i == 0:
                 set_par(vid, cc.PAR_ACTIVE_CONTROLLER, cc.ACC)

@@ -19,8 +19,49 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
 
+from utils import add_vehicle, set_par, change_lane, communicate, \
+    get_distance, get_par, start_sumo, running
+from Direction import Direction
+from enum import Enum, auto
+import traci
+
+
 def is_platoon_vehicle(vid):
     return vid.startswith(VehicleCounter.ID_PRE_PLATOON)
+
+
+class Vehicle:
+    # vehicle length
+    LENGTH = 4
+    # inter-vehicle distance
+    DISTANCE = 5
+
+    DEFAULT_SLOW_SPEED = 30
+    DEFAULT_SLOW_LANE = 0
+
+    CMD_CHANGE_LANE_LEFT = auto()
+    CMD_CHANGE_LANE_RIGHT = auto()
+
+    def __init__(self, vid, commands=dict()):
+        self.vid = vid
+        self.commands = commands
+
+    def get_lane(self):
+        return traci.vehicle.getLaneIndex(self.vid)
+
+    def change_lane(self, direction):
+        lane = self.get_lane()
+        destination_lane = lane + direction
+
+        change_lane(self.vid, destination_lane)
+
+    def tick(self, step):
+        if step in self.commands:
+            command = self.commands.get(step)
+            if command == self.CMD_CHANGE_LANE_LEFT:
+                self.change_lane(Direction.LEFT)
+            elif command == self.CMD_CHANGE_LANE_RIGHT:
+                self.change_lane(Direction.RIGHT)
 
 
 class VehicleCounter:
@@ -40,6 +81,9 @@ class VehicleCounter:
         vid = f"{self.ID_PRE_PLATOON}{self.i}"
         self.i += 1
         return vid
+
+    def reset(self):
+        self.i = 0
 
 
 vehicle_counter = VehicleCounter()

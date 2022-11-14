@@ -87,16 +87,19 @@ y_vel = defaultdict(list)
 def add_vehicles(n, real_engine=False):
     # slow vehicle Lane 0
     vid = RIGHT_SLOW_VEHICLE
-    add_vehicle(vid, (n + 9) * (DISTANCE + LENGTH) + 50, 0, SPEED - 20, DISTANCE, real_engine, type_id='PlatoonCar')
+    add_vehicle(vid, (n + 9 + 10) * (DISTANCE + LENGTH) + 50, 1, SPEED - 20, DISTANCE, real_engine,
+                type_id='PlatoonCar')
     time.sleep(1)
-    change_lane(vid, 0)
+    change_lane(vid, 1)
     set_par(vid, cc.PAR_ACTIVE_CONTROLLER, cc.ACC)
     set_par(vid, cc.PAR_CACC_SPACING, DISTANCE)
 
     # slow vehicle Lane 1
     vid = LEFT_SLOW_VEHICLE
-    add_vehicle(vid, (n + 15) * (DISTANCE + LENGTH) + 50, 1, SPEED - 20, DISTANCE, real_engine, type_id='PlatoonCar')
-    change_lane(vid, 1)
+    add_vehicle(vid, (n + 15 + 10) * (DISTANCE + LENGTH) + 50, 2, SPEED - 20, DISTANCE, real_engine,
+                type_id='PlatoonCar')
+    time.sleep(1)
+    change_lane(vid, 2)
     set_par(vid, cc.PAR_ACTIVE_CONTROLLER, cc.ACC)
     set_par(vid, cc.PAR_CACC_SPACING, DISTANCE)
 
@@ -107,17 +110,17 @@ def main(demo_mode, real_engine, setter=None):
     random.seed(1)
     start_sumo("cfg/freeway_test.sumocfg", False)
     step = 0
-    while running(demo_mode, step, 6000):
+    while running(demo_mode, step, 26000):
 
         traci.simulationStep()
 
         # first step, add vehicles
         if step == 0:
-            platoon = Platoon(n=N_VEHICLES, pos=DISTANCE, speed=SPEED)
+            platoon = Platoon(n=N_VEHICLES, pos=DISTANCE, speed=SPEED - 15)
             platoon_manager.add_platoon(platoon)
 
             add_vehicles(N_VEHICLES, real_engine)
-            traci.gui.trackVehicle("View #0", LEFT_SLOW_VEHICLE)
+            traci.gui.trackVehicle("View #0", platoon.vehicles[0])
             traci.gui.setZoom("View #0", 20000)
 
         platoon_manager.tick()

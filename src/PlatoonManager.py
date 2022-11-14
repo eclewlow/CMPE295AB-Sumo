@@ -27,7 +27,11 @@ class PlatoonManager:
         for p in self.platoons:
             p.tick()
 
+    def reset(self):
+        self.platoons = list()
+
     def __init__(self, *args, **kwargs):
         self.platoons = list()
+
 
 platoon_manager = PlatoonManager()
