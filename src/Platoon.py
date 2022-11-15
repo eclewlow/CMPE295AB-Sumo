@@ -121,7 +121,7 @@ class Platoon:
         if self.state == self.STATE_OVERTAKING:
             # keep checking left lane for chance to change back
             index = self.get_lane_change_split_index(Direction.LEFT)
-            if self.get_length() == index:
+            if self.get_length() == index and not self.vehicle_to_overtake_exists(Direction.LEFT):
                 # the left lane can fit the whole platoon, so make the left lane change
                 self.change_lane(Direction.LEFT)
                 self.set_state(self.STATE_CRUISING)
@@ -160,13 +160,24 @@ class Platoon:
             followers = traci.vehicle.getRightFollowers(vid)
         for l in leaders:
             _, dist = l
-            if dist < Vehicle.LENGTH + Vehicle.DISTANCE:
+            if dist <= Vehicle.LENGTH:
                 return False
         for f in followers:
             _, dist = f
-            if dist < Vehicle.LENGTH + Vehicle.DISTANCE:
+            if dist <= Vehicle.LENGTH:
                 return False
         return True
+
+    def vehicle_to_overtake_exists(self, direction):
+        if direction == Direction.LEFT:
+            leaders = traci.vehicle.getLeftLeaders(self.vehicles[0])
+        if direction == Direction.RIGHT:
+            leaders = traci.vehicle.getRightLeaders(self.vehicles[0])
+        for l in leaders:
+            _, dist = l
+            if dist <= Vehicle.LENGTH + Vehicle.DISTANCE:
+                return True
+        return False
 
     def get_lane_change_split_index(self, direction):
         for i, vid in enumerate(self.vehicles):

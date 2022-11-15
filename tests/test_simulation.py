@@ -110,7 +110,7 @@ def test_four_vehicle_split(request):
                                      platoon_start_lane=Platoon.DEFAULT_LANE,
                                      platoon_desired_speed=50)
 
-    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=14 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=13 * (Vehicle.DISTANCE + Vehicle.LENGTH),
                                             vehicle_start_lane=1, vehicle_start_speed=30)
     slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=19 * (Vehicle.DISTANCE + Vehicle.LENGTH),
                                             vehicle_start_lane=2, vehicle_start_speed=30)
