@@ -158,6 +158,7 @@ class Platoon:
         if direction == Direction.RIGHT:
             leaders = traci.vehicle.getRightLeaders(vid)
             followers = traci.vehicle.getRightFollowers(vid)
+
         for l in leaders:
             _, dist = l
             if dist <= Vehicle.LENGTH:
