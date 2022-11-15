@@ -151,9 +151,26 @@ class Platoon:
                         self.change_lane(Direction.RIGHT)
                         self.set_state(self.STATE_OVERTAKING)
 
+    def could_lane_change(self, vid, direction):
+        if direction == Direction.LEFT:
+            leaders = traci.vehicle.getLeftLeaders(vid)
+            followers = traci.vehicle.getLeftFollowers(vid)
+        if direction == Direction.RIGHT:
+            leaders = traci.vehicle.getRightLeaders(vid)
+            followers = traci.vehicle.getRightFollowers(vid)
+        for l in leaders:
+            _, dist = l
+            if dist < Vehicle.LENGTH + Vehicle.DISTANCE:
+                return False
+        for f in followers:
+            _, dist = f
+            if dist < Vehicle.LENGTH + Vehicle.DISTANCE:
+                return False
+        return True
+
     def get_lane_change_split_index(self, direction):
         for i, vid in enumerate(self.vehicles):
-            if not traci.vehicle.couldChangeLane(vid, direction):
+            if not self.could_lane_change(vid, direction):
                 return i
         return len(self.vehicles)
 
@@ -167,7 +184,7 @@ class Platoon:
 
     def build(self, n=6, pos=0, speed=SPEED, lane=DEFAULT_LANE):
         for i in range(n):
-            vid = vehicle_counter.get_next_vehicle_id()
+            vid = vehicle_counter.get_next_platoon_vehicle_id()
             self.vehicles.append(vid)
             add_vehicle(vid, pos - i * (Vehicle.DISTANCE + Vehicle.LENGTH), 0, speed, Vehicle.DISTANCE)
             change_lane(vid, lane)
