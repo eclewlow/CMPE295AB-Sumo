@@ -76,18 +76,21 @@ class Simulation:
                           speed=platoon_desired_speed)
         platoon_manager.add_platoon(platoon)
 
-        return platoon.vehicles[0]
+        return platoon
 
     def add_vehicle(self, vehicle_start_position=0, vehicle_start_lane=Vehicle.DEFAULT_SLOW_LANE,
-                    vehicle_start_speed=Vehicle.DEFAULT_SLOW_SPEED, commands=dict()):
+                    vehicle_start_speed=Vehicle.DEFAULT_SLOW_SPEED, v2v=False, commands=dict()):
         vid = vehicle_counter.get_next_vehicle_id()
-        add_vehicle(vid, vehicle_start_position, 0, vehicle_start_speed, Vehicle.DISTANCE)
-        # time.sleep(1)
+
+        min_gap = traci.vehicletype.getMinGap('V2V_Car')
+
+        add_vehicle(vid, vehicle_start_position, 0, vehicle_start_speed, min_gap, type_id='V2V_Car')
+
         change_lane(vid, vehicle_start_lane)
         set_par(vid, cc.PAR_ACTIVE_CONTROLLER, cc.ACC)
-        set_par(vid, cc.PAR_CACC_SPACING, Vehicle.DISTANCE)
+        set_par(vid, cc.PAR_CACC_SPACING, min_gap)
 
-        vehicle_manager.add_vehicle(Vehicle(vid, commands))
+        vehicle_manager.add_vehicle(Vehicle(vid, commands, v2v=v2v))
 
         return vid
 

@@ -47,15 +47,15 @@ def test_add_slow_vehicle_and_track_platoon(request):
                                      platoon_start_lane=Platoon.DEFAULT_LANE,
                                      platoon_desired_speed=50)
 
-    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=6 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=6 * (platoon.vehicle_length + platoon.min_gap),
                                             vehicle_start_lane=1, vehicle_start_speed=30)
-    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=15 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=15 * (platoon.vehicle_length + platoon.min_gap),
                                             vehicle_start_lane=0, vehicle_start_speed=30)
 
     simulation.set_simulation_time_length(10)  # end simulation after 10 seconds
 
     simulation.set_zoom(20000)
-    simulation.track_vehicle(platoon)
+    simulation.track_vehicle(platoon.vehicles[0])
 
     simulation.run()
 
@@ -64,55 +64,55 @@ def test_add_slow_vehicle_and_track_platoon(request):
 def test_add_slow_vehicle_and_require_overtake(request):
     simulation = request.config.sim
 
-    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=6 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=50,
                                      platoon_start_lane=Platoon.DEFAULT_LANE,
                                      platoon_desired_speed=50)
 
-    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=6 * (Vehicle.DISTANCE + Vehicle.LENGTH),
-                                            vehicle_start_lane=1, vehicle_start_speed=30)
-    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=18 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=6 * (platoon.vehicle_length + platoon.min_gap),
                                             vehicle_start_lane=2, vehicle_start_speed=30)
+    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=10 * (platoon.vehicle_length + platoon.min_gap),
+                                            vehicle_start_lane=1, vehicle_start_speed=10)
 
-    simulation.set_simulation_time_length(25)  # end simulation after 25 seconds
+    simulation.set_simulation_time_length(60)  # end simulation after 25 seconds
 
     simulation.set_zoom(20000)
-    simulation.track_vehicle(platoon)
+    simulation.track_vehicle(platoon.vehicles[0])
 
     simulation.run()
 
 
-# @pytest.mark.skip(reason="uncomment this to skip this test")
+@pytest.mark.skip(reason="uncomment this to skip this test")
 def test_unable_to_split(request):
     simulation = request.config.sim
 
-    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=6 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=50,
                                      platoon_start_lane=Platoon.DEFAULT_LANE,
                                      platoon_desired_speed=50)
 
-    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=15 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=15 * (platoon.vehicle_length + platoon.min_gap),
                                             vehicle_start_lane=1, vehicle_start_speed=30)
-    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=18 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=18 * (platoon.vehicle_length + platoon.min_gap),
                                             vehicle_start_lane=2, vehicle_start_speed=30)
 
     simulation.set_simulation_time_length(40)  # end simulation after 40 seconds
 
     simulation.set_zoom(20000)
-    simulation.track_vehicle(platoon)
+    simulation.track_vehicle(platoon.vehicles[0])
 
     simulation.run()
 
 
-# @pytest.mark.skip(reason="uncomment this to skip this test")
+@pytest.mark.skip(reason="uncomment this to skip this test")
 def test_four_vehicle_split(request):
     simulation = request.config.sim
 
-    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=6 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=50,
                                      platoon_start_lane=Platoon.DEFAULT_LANE,
                                      platoon_desired_speed=50)
 
-    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=13 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=13 * (platoon.vehicle_length + platoon.min_gap),
                                             vehicle_start_lane=1, vehicle_start_speed=30)
-    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=19 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=19 * (platoon.vehicle_length + platoon.min_gap),
                                             vehicle_start_lane=2, vehicle_start_speed=30)
 
     simulation.set_simulation_time_length(30)  # end simulation after 30 seconds
@@ -127,13 +127,13 @@ def test_four_vehicle_split(request):
 def test_three_vehicle_split(request):
     simulation = request.config.sim
 
-    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=6 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=50,
                                      platoon_start_lane=Platoon.DEFAULT_LANE,
                                      platoon_desired_speed=50)
 
-    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=14 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=14 * (platoon.vehicle_length + platoon.min_gap),
                                             vehicle_start_lane=1, vehicle_start_speed=30)
-    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=19 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=19 * (platoon.vehicle_length + platoon.min_gap),
                                             vehicle_start_lane=2, vehicle_start_speed=30)
 
     simulation.set_simulation_time_length(30)  # end simulation after 30 seconds
@@ -144,19 +144,19 @@ def test_three_vehicle_split(request):
     simulation.run()
 
 
-# @pytest.mark.skip(reason="uncomment this to skip this test")
+@pytest.mark.skip(reason="uncomment this to skip this test")
 def test_dangerous_situation(request):
     simulation = request.config.sim
 
-    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=6 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=50,
                                      platoon_start_lane=Platoon.DEFAULT_LANE,
                                      platoon_desired_speed=50)
 
-    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=6 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=6 * (platoon.vehicle_length + platoon.min_gap),
                                             vehicle_start_lane=1, vehicle_start_speed=30)
-    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=15 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=15 * (platoon.vehicle_length + platoon.min_gap),
                                             vehicle_start_lane=2, vehicle_start_speed=30)
-    merging_vehicle = simulation.add_vehicle(vehicle_start_position=12 * (Vehicle.DISTANCE + Vehicle.LENGTH),
+    merging_vehicle = simulation.add_vehicle(vehicle_start_position=12 * (platoon.vehicle_length + platoon.min_gap),
                                              vehicle_start_lane=0, vehicle_start_speed=30,
                                              commands={
                                                  1000: Vehicle.CMD_CHANGE_LANE_LEFT})  # at 10 seconds change lanes
@@ -164,6 +164,35 @@ def test_dangerous_situation(request):
     simulation.set_simulation_time_length(10)  # end simulation after 10 seconds
 
     simulation.set_zoom(20000)
-    simulation.track_vehicle(platoon)
+    simulation.track_vehicle(platoon.vehicles[0])
+
+    simulation.run()
+
+
+# @pytest.mark.skip(reason="uncomment this to skip this test")
+def test_requires_v2v(request):
+    simulation = request.config.sim
+
+    platoon_vehicle_length = traci.vehicletype.getLength('PlatoonCar')
+    platoon_min_gap = traci.vehicletype.getMinGap('PlatoonCar')
+    platoon_start_pos = 6 * (platoon_vehicle_length + platoon_min_gap)
+
+    platoon = simulation.add_platoon(platoon_length=6,
+                                     platoon_start_position=platoon_start_pos,
+                                     platoon_start_lane=Platoon.DEFAULT_LANE,
+                                     platoon_desired_speed=50)
+
+    slow_vehicle_1 = simulation.add_vehicle(
+        vehicle_start_position=platoon_start_pos + (platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_lane=1, vehicle_start_speed=30)
+    slow_vehicle_2 = simulation.add_vehicle(
+        vehicle_start_position=platoon_start_pos + (platoon.get_length() - 3) * (
+                    platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_lane=2, vehicle_start_speed=30)
+
+    simulation.set_simulation_time_length(30)  # end simulation after 30 seconds
+
+    simulation.set_zoom(20000)
+    simulation.track_vehicle(platoon.vehicles[0])
 
     simulation.run()

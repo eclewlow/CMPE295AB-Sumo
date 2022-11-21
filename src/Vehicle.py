@@ -42,9 +42,10 @@ class Vehicle:
     CMD_CHANGE_LANE_LEFT = auto()
     CMD_CHANGE_LANE_RIGHT = auto()
 
-    def __init__(self, vid, commands=dict()):
+    def __init__(self, vid, commands=dict(), v2v=False):
         self.vid = vid
         self.commands = commands
+        self.v2v = v2v
 
     def get_lane(self):
         return traci.vehicle.getLaneIndex(self.vid)

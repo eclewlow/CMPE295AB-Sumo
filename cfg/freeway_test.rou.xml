@@ -37,15 +37,28 @@
            speedDev="0.1" speedFactor="1.2" vClass="trailer"
            color="255,0,0"/>
     <vType id="PlatoonCar" accel="16" decel="12" maxSpeed="50"
+           length="12" emissionClass="HBEFA3/PC" laneChangeModel="SL2015"
+           carFollowModel="CC" sigma="0.5" tau="1.0" minGap="5"
+           speedDev="0.1" speedFactor="1.2" vClass="trailer"
+           color="100,149,237" lanesCount="3"
+           omegaN="0.2" xi="1" c1="0.5"
+           ploegKp="0.2" ploegKd="0.7" ploegH="0.5" ccAccel="10">
+    </vType>
+    <vType id="V2V_Car" accel="16" decel="12" maxSpeed="44.4"
+           length="4.7" emissionClass="HBEFA3/PC" laneChangeModel="SL2015"
+           carFollowModel="CC" sigma="0.5" tau="1.8" minGap="2.5"
+           speedDev="0.1" speedFactor="1.2" vClass="passenger" lanesCount="3"
+           latAlignment="center"
+           color="100,149,237">
+    </vType>
+    <vType id="V2V_Car_backup" accel="16" decel="12" maxSpeed="50"
            length="4.7" emissionClass="HBEFA3/PC" laneChangeModel="SL2015"
            carFollowModel="CC" sigma="0.5" tau="1.0" minGap="0"
            speedDev="0.1" speedFactor="1.2" vClass="passenger"
            color="100,149,237" lanesCount="3"
            omegaN="0.2" xi="1" c1="0.5"
            ploegKp="0.2" ploegKd="0.7" ploegH="0.5" ccAccel="10">
-        <!--			<carFollowing-CC tauEngine="0.5" omegaN="0.2" xi="1" c1="0.5" decel="9" lanesCount="4" ccAccel="1.5"/>-->
     </vType>
-
     <!-- Routes -->
     <route id="freeway" edges="freeway exit"/>
     <route id="main" edges="freeway exit"/>

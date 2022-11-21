@@ -116,7 +116,14 @@ class Platoon:
 
         if self.state == self.STATE_CRUISING:
             # get lane position and move towards default lane
-            pass
+            # keep checking left lane for chance to change back
+            lane = self.get_lane()
+            if lane != Platoon.DEFAULT_LANE:
+                index = self.get_lane_change_split_index(Direction.LEFT)
+                if self.get_length() == index and not self.vehicle_to_overtake_exists(Direction.LEFT):
+                    # the left lane can fit the whole platoon, so make the left lane change
+                    self.change_lane(Direction.LEFT)
+                    self.set_state(self.STATE_CRUISING)
 
         if self.state == self.STATE_OVERTAKING:
             # keep checking left lane for chance to change back
@@ -131,7 +138,7 @@ class Platoon:
             self.set_leader(leader)
 
             # if we have approached the leading vehicle
-            if distance < Vehicle.LENGTH + Vehicle.DISTANCE:
+            if distance < self.min_gap + self.vehicle_length and self.get_speed() < self.desired_speed:
 
                 # check lane change availability
                 index = self.get_lane_change_split_index(Direction.RIGHT)
@@ -150,6 +157,10 @@ class Platoon:
 
                         self.change_lane(Direction.RIGHT)
                         self.set_state(self.STATE_OVERTAKING)
+                    else:
+                        # we cannot lane change, so check front vehicle has v2v
+                        # self.set_state(self.STATE_STUCK_BEHIND_LEADER)
+                        pass
 
     def could_lane_change(self, vid, direction):
         if direction == Direction.LEFT:
@@ -161,13 +172,19 @@ class Platoon:
 
         for l in leaders:
             _, dist = l
-            if dist <= Vehicle.LENGTH:
+            if dist <= self.vehicle_length:
                 return False
         for f in followers:
             _, dist = f
-            if dist <= Vehicle.LENGTH:
+            if dist <= self.vehicle_length:
                 return False
         return True
+
+    def get_speed(self):
+        return traci.vehicle.getSpeed(self.vehicles[0])
+
+    def get_total_length(self):
+        return self.get_length() * (self.vehicle_length + self.min_gap) - self.min_gap
 
     def vehicle_to_overtake_exists(self, direction):
         if direction == Direction.LEFT:
@@ -176,7 +193,7 @@ class Platoon:
             leaders = traci.vehicle.getRightLeaders(self.vehicles[0])
         for l in leaders:
             _, dist = l
-            if dist <= Vehicle.LENGTH + Vehicle.DISTANCE:
+            if dist <= self.min_gap + self.vehicle_length:
                 return True
         return False
 
@@ -198,7 +215,8 @@ class Platoon:
         for i in range(n):
             vid = vehicle_counter.get_next_platoon_vehicle_id()
             self.vehicles.append(vid)
-            add_vehicle(vid, pos - i * (Vehicle.DISTANCE + Vehicle.LENGTH), 0, speed, Vehicle.DISTANCE)
+
+            add_vehicle(vid, pos - i * (self.min_gap + self.vehicle_length + 1), 0, speed, self.min_gap)
             change_lane(vid, lane)
             if i == 0:
                 set_par(vid, cc.PAR_ACTIVE_CONTROLLER, cc.ACC)
@@ -212,6 +230,8 @@ class Platoon:
         self.vehicles = kwargs.get("vehicles", list())
         self.desired_speed = kwargs.get("speed", 0)
         self.state = self.STATE_CRUISING
+        self.vehicle_length = traci.vehicletype.getLength('PlatoonCar')
+        self.min_gap = traci.vehicletype.getMinGap('PlatoonCar')
 
         # this is not a split platoon. it is a new platoon from scratch
         if "vehicles" not in kwargs:

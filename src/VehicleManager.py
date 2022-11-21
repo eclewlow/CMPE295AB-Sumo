@@ -21,17 +21,20 @@
 
 class VehicleManager:
     def add_vehicle(self, vehicle):
-        self.vehicles.append(vehicle)
+        self.vehicles[vehicle.vid] = vehicle
+
+    def get_vehicle(self, vid):
+        return self.vehicles.get(vid)
 
     def tick(self, step):
-        for v in self.vehicles:
+        for v in self.vehicles.values():
             v.tick(step)
 
     def reset(self):
-        self.vehicles = list()
+        self.vehicles = dict()
 
     def __init__(self, *args, **kwargs):
-        self.vehicles = list()
+        self.vehicles = dict()
 
 
 vehicle_manager = VehicleManager()

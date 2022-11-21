@@ -20,6 +20,7 @@ import os
 import ccparams as cc
 import random
 import math
+
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
     sys.path.append(tools)
@@ -28,7 +29,6 @@ else:
 
 import sumolib
 import traci
-
 
 # constants for lane change mode
 DEFAULT_LC = 0b1001010101
@@ -66,7 +66,8 @@ def change_lane(vid, lane):
     traci.vehicle.changeLane(vid, lane, 1000000.0)
 
 
-def add_vehicle(vid, position, lane, speed, cacc_spacing, real_engine=False, type_id='PlatoonCar'):
+def add_vehicle(vid, position, lane, speed, cacc_spacing, real_engine=False, type_id='PlatoonCar',
+                car_follow_model='CC'):
     """
     Adds a vehicle to the simulation
     :param vid: vehicle id to be set
@@ -82,11 +83,12 @@ def add_vehicle(vid, position, lane, speed, cacc_spacing, real_engine=False, typ
     #                   typeID="vtypeauto")
     traci.vehicle.add(vehID=vid, routeID='freeway', departPos=str(position), departSpeed=str(speed),
                       departLane=str(lane), typeID=type_id)
-    set_par(vid, cc.CC_PAR_CACC_C1, 0.5)
-    set_par(vid, cc.CC_PAR_CACC_XI, 2)
-    set_par(vid, cc.CC_PAR_CACC_OMEGA_N, 1)
-    set_par(vid, cc.PAR_CACC_SPACING, cacc_spacing)
-    set_par(vid, cc.PAR_CC_DESIRED_SPEED, speed)
+    if car_follow_model == 'CC':
+        set_par(vid, cc.CC_PAR_CACC_C1, 0.5)
+        set_par(vid, cc.CC_PAR_CACC_XI, 2)
+        set_par(vid, cc.CC_PAR_CACC_OMEGA_N, 1)
+        set_par(vid, cc.PAR_CACC_SPACING, cacc_spacing)
+        set_par(vid, cc.PAR_CC_DESIRED_SPEED, speed)
     if real_engine:
         set_par(vid, cc.CC_PAR_VEHICLE_ENGINE_MODEL,
                 cc.CC_ENGINE_MODEL_REALISTIC)
@@ -108,7 +110,7 @@ def get_distance(v1, v2):
     (v, a, u, x1, y1, t, _, _, _) = cc.unpack(v_data)
     v_data = get_par(v2, cc.PAR_SPEED_AND_ACCELERATION)
     (v, a, u, x2, y2, t, _, _, _) = cc.unpack(v_data)
-    return math.sqrt((x1 - x2)**2 + (y1 - y2)**2) - 4
+    return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2) - 4
 
 
 def communicate(topology):
