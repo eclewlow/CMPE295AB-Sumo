@@ -18,6 +18,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
+import traci
+from utils import add_vehicle, set_par, change_lane, communicate, \
+    get_distance, get_par, start_sumo, running
+import ccparams as cc
 
 class VehicleManager:
     def add_vehicle(self, vehicle):
@@ -36,5 +40,13 @@ class VehicleManager:
     def __init__(self, *args, **kwargs):
         self.vehicles = dict()
 
+    def v2v_request_coordinates(self):
+        v2v_response = list()
+        for vid, vehicle in self.vehicles.items():
+            if vehicle.v2v:
+                vehicle_data = get_par(vid, cc.PAR_SPEED_AND_ACCELERATION)
+                (v, a, u, x, y, t, _, _, _) = cc.unpack(vehicle_data)
+                v2v_response.append((vid, v, a, u, x, y, t))
+        return v2v_response
 
 vehicle_manager = VehicleManager()

@@ -17,6 +17,8 @@
 
 import sys
 import os
+import time
+
 import ccparams as cc
 import random
 import math
@@ -78,11 +80,11 @@ def add_vehicle(vid, position, lane, speed, cacc_spacing, real_engine=False, typ
     :param real_engine: use the realistic engine model or the first order lag
     model
     """
-    # traci.vehicle.add(vid, "platoon_route",
-    #                   pos=position, speed=speed, lane=lane,
-    #                   typeID="vtypeauto")
     traci.vehicle.add(vehID=vid, routeID='freeway', departPos=str(position), departSpeed=str(speed),
                       departLane=str(lane), typeID=type_id)
+    traci.vehicle.setLaneChangeMode(vid, FIX_LC)
+    traci.vehicle.changeLane(vid, lane, 1000000.0)
+
     if car_follow_model == 'CC':
         set_par(vid, cc.CC_PAR_CACC_C1, 0.5)
         set_par(vid, cc.CC_PAR_CACC_XI, 2)

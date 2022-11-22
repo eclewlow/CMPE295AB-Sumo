@@ -24,6 +24,7 @@ from utils import add_vehicle, set_par, change_lane, communicate, \
 from Direction import Direction
 from enum import Enum, auto
 import traci
+from V2V import v2v
 
 
 def is_platoon_vehicle(vid):
@@ -46,6 +47,8 @@ class Vehicle:
         self.vid = vid
         self.commands = commands
         self.v2v = v2v
+        self.vehicle_length = traci.vehicletype.getLength('V2V_Car')
+        self.min_gap = traci.vehicletype.getMinGap('V2V_Car')
 
     def get_lane(self):
         return traci.vehicle.getLaneIndex(self.vid)
@@ -62,6 +65,40 @@ class Vehicle:
             if command == self.CMD_CHANGE_LANE_LEFT:
                 self.change_lane(Direction.LEFT)
             elif command == self.CMD_CHANGE_LANE_RIGHT:
+                self.change_lane(Direction.RIGHT)
+
+    def could_lane_change(self, direction):
+        edge_id = traci.vehicle.getRoadID(self.vid)
+        lane_count = traci.edge.getLaneNumber(edge_id)
+        lane_index = traci.vehicle.getLaneIndex(self.vid)
+
+        if direction == Direction.LEFT and lane_index == lane_count - 1:
+            return False
+        if direction == Direction.RIGHT and lane_index == 0:
+            return False
+
+        if direction == Direction.LEFT:
+            leaders = traci.vehicle.getLeftLeaders(self.vid)
+            followers = traci.vehicle.getLeftFollowers(self.vid)
+        if direction == Direction.RIGHT:
+            leaders = traci.vehicle.getRightLeaders(self.vid)
+            followers = traci.vehicle.getRightFollowers(self.vid)
+
+        for l in leaders:
+            _, dist = l
+            if dist <= self.vehicle_length:
+                return False
+        for f in followers:
+            _, dist = f
+            if dist <= self.vehicle_length:
+                return False
+        return True
+
+    def receive_v2v_request(self, sender_id, request_type):
+        if request_type == v2v.V2V_LANE_CHANGE_MANEUVER_REQUEST:
+            if self.could_lane_change(Direction.LEFT):
+                self.change_lane(Direction.LEFT)
+            elif self.could_lane_change(Direction.RIGHT):
                 self.change_lane(Direction.RIGHT)
 
 

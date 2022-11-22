@@ -84,9 +84,8 @@ class Simulation:
 
         min_gap = traci.vehicletype.getMinGap('V2V_Car')
 
-        add_vehicle(vid, vehicle_start_position, 0, vehicle_start_speed, min_gap, type_id='V2V_Car')
+        add_vehicle(vid, vehicle_start_position, vehicle_start_lane, vehicle_start_speed, min_gap, type_id='V2V_Car')
 
-        change_lane(vid, vehicle_start_lane)
         set_par(vid, cc.PAR_ACTIVE_CONTROLLER, cc.ACC)
         set_par(vid, cc.PAR_CACC_SPACING, min_gap)
 
