@@ -133,11 +133,18 @@ class Platoon:
 
         if self.state == self.STATE_OVERTAKING:
             # keep checking left lane for chance to change back
-            index = self.get_lane_change_split_index(Direction.LEFT)
-            if self.get_length() == index and not self.vehicle_to_overtake_exists(Direction.LEFT):
+            index_right = self.get_lane_change_split_index(Direction.RIGHT)
+            index_left = self.get_lane_change_split_index(Direction.LEFT)
+
+            if self.get_length() == index_left and not self.vehicle_to_overtake_exists(Direction.LEFT):
                 # the left lane can fit the whole platoon, so make the left lane change
                 print("changing lane overtake")
                 self.change_lane(Direction.LEFT)
+                self.set_state(self.STATE_CRUISING)
+            elif self.get_length() == index_right and not self.vehicle_to_overtake_exists(Direction.RIGHT):
+                # the left lane can fit the whole platoon, so make the left lane change
+                print("changing lane overtake")
+                self.change_lane(Direction.RIGHT)
                 self.set_state(self.STATE_CRUISING)
 
         if leader is not None and not is_platoon_vehicle(leader):
@@ -158,10 +165,16 @@ class Platoon:
                     index_right = self.get_lane_change_split_index(Direction.RIGHT)
                     index_left = self.get_lane_change_split_index(Direction.LEFT)
 
-                    if self.get_length() == index:
+                    if self.get_length() == index_right:
                         # no split required, just do lane change
                         print("changing lane")
                         self.change_lane(Direction.RIGHT)
+                        self.set_state(self.STATE_OVERTAKING)
+                        pass
+                    elif self.get_length() == index_left:
+                        # no split required, just do lane change
+                        print("changing lane")
+                        self.change_lane(Direction.LEFT)
                         self.set_state(self.STATE_OVERTAKING)
                         pass
                     else:
