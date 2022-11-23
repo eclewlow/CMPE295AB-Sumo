@@ -32,21 +32,6 @@ class V2V:
     def __init__(self, *args, **kwargs):
         pass
 
-    #
-    # def send_coordinates(self, sender_id, recipient_id = None):
-    #     vehicle_data = get_par(sender_id, cc.PAR_SPEED_AND_ACCELERATION)
-    #     (v, a, u, x, y, t, _, _, _) = cc.unpack(vehicle_data)
-    #
-    #     if recipient_id is None:
-    #         # broadcast coordinates
-    #         for vid, vehicle in vehicle_manager.vehicles.items():
-    #             if vehicle.v2v:
-    #                 vehicle.receive_coordinates((vid, v, a, u, x, y, t))
-    #     else:
-    #         for vid, vehicle in vehicle_manager.get_vehicle():
-    #             if vehicle.v2v:
-    #                 vehicle.receive_coordinates((vid, v, a, u, x, y, t))
-    #     return response
     V2V_LANE_CHANGE_MANEUVER_REQUEST = auto()
 
     def request_coordinates(self):
