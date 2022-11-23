@@ -46,6 +46,7 @@ class Platoon:
     STATE_OVERTAKING_LEFT = auto()
     STATE_REQUEST_LEADER_LANE_CHANGE = auto()
     STATE_REQUEST_LEFT_VEHICLES_LANE_CHANGE = auto()
+    STATE_REQUEST_RIGHT_VEHICLES_LANE_CHANGE = auto()
 
     def get_length(self):
         return len(self.vehicles)
@@ -108,6 +109,7 @@ class Platoon:
             set_par(vid, cc.PAR_FRONT_FAKE_DATA, cc.pack(f_v, f_u, f_d))
 
     def set_state(self, state):
+        self.last_state_change_step = self.step
         self.state = state
 
     def tick(self):
@@ -138,16 +140,14 @@ class Platoon:
             index_right = self.get_lane_change_split_index(Direction.RIGHT)
             index_left = self.get_lane_change_split_index(Direction.LEFT)
 
-            if self.state == self.STATE_OVERTAKING_RIGHT and self.get_length() == index_left and not self.vehicle_to_overtake_exists(
-                    Direction.LEFT):
+            if self.state == self.STATE_OVERTAKING_RIGHT and self.get_length() == index_left \
+                    and not self.vehicle_to_overtake_exists(Direction.LEFT):
                 # the left lane can fit the whole platoon, so make the left lane change
-                print("changing lane overtake")
                 self.change_lane(Direction.LEFT)
                 self.set_state(self.STATE_CRUISING)
-            elif self.state == self.STATE_OVERTAKING_LEFT and self.get_length() == index_right and not self.vehicle_to_overtake_exists(
-                    Direction.RIGHT):
+            elif self.state == self.STATE_OVERTAKING_LEFT and self.get_length() == index_right \
+                    and not self.vehicle_to_overtake_exists(Direction.RIGHT):
                 # the left lane can fit the whole platoon, so make the left lane change
-                print("changing lane overtake")
                 self.change_lane(Direction.RIGHT)
                 self.set_state(self.STATE_CRUISING)
 
@@ -169,44 +169,65 @@ class Platoon:
                     index_right = self.get_lane_change_split_index(Direction.RIGHT)
                     index_left = self.get_lane_change_split_index(Direction.LEFT)
 
-                    left_lane_vehicles = self.get_left_lane_vehicles()
-                    right_lane_vehicles = self.get_right_lane_vehicles()
+                    # left_lane_vehicles = self.get_left_lane_vehicles()
+                    # right_lane_vehicles = self.get_right_lane_vehicles()
 
-                    # self.is_target_vehicle_gps_match(leader, v2v_response):
-                    if self.are_target_vehicles_gps_match(left_lane_vehicles, v2v_response):
+                    # check lane change availability
+                    right_lane_vehicles_index, right_lane_vehicles = self.get_v2v_vehicles_up_to_index(Direction.RIGHT,
+                                                                                                       v2v_response)
+                    left_lane_vehicles_index, left_lane_vehicles = self.get_v2v_vehicles_up_to_index(Direction.LEFT,
+                                                                                                     v2v_response)
+
+                    if left_lane_vehicles_index >= self.M and len(left_lane_vehicles) > 0:
                         for vid in left_lane_vehicles:
                             v2v.request_lane_change_maneuver(self.vehicles[0], vid)
-                        self.set_state(self.STATE_REQUEST_LEADER_LANE_CHANGE)
-                    elif self.are_target_vehicles_gps_match(left_lane_vehicles, v2v_response):
-                        for vid in left_lane_vehicles:
+                        self.set_state(self.STATE_REQUEST_LEFT_VEHICLES_LANE_CHANGE)
+                    elif right_lane_vehicles_index >= self.M and len(right_lane_vehicles) > 0:
+                        for vid in right_lane_vehicles:
                             v2v.request_lane_change_maneuver(self.vehicles[0], vid)
-                        self.set_state(self.STATE_REQUEST_LEADER_LANE_CHANGE)
+                        self.set_state(self.STATE_REQUEST_RIGHT_VEHICLES_LANE_CHANGE)
                     elif self.get_length() == index_right:
-                        # no split required, just do lane change
-                        self.change_lane(Direction.RIGHT)
-                        self.set_state(self.STATE_OVERTAKING_RIGHT)
+                        if self.state == self.STATE_REQUEST_RIGHT_VEHICLES_LANE_CHANGE and \
+                                self.step - self.last_state_change_step < 100:
+                            pass
+                        else:
+                            # no split required, just do lane change
+                            self.change_lane(Direction.RIGHT)
+                            self.set_state(self.STATE_OVERTAKING_RIGHT)
                     elif self.get_length() == index_left:
-                        # no split required, just do lane change
-                        self.change_lane(Direction.LEFT)
-                        self.set_state(self.STATE_OVERTAKING_LEFT)
+                        if self.state == self.STATE_REQUEST_LEFT_VEHICLES_LANE_CHANGE and \
+                                self.step - self.last_state_change_step < 100:
+                            pass
+                        else:
+                            # no split required, just do lane change
+                            self.change_lane(Direction.LEFT)
+                            self.set_state(self.STATE_OVERTAKING_LEFT)
                     else:
                         # check if the split index
                         if index_right >= self.M:
-                            # front platoon after split meets M requirement, so split
-                            rear_platoon = self.split(index_right)
-                            print("we split")
-                            platoon_manager.add_platoon(rear_platoon)
+                            if self.state == self.STATE_REQUEST_RIGHT_VEHICLES_LANE_CHANGE and \
+                                    self.step - self.last_state_change_step < 100:
+                                pass
+                            else:
+                                # front platoon after split meets M requirement, so split
+                                rear_platoon = self.split(index_right)
+                                platoon_manager.add_platoon(rear_platoon)
 
-                            self.change_lane(Direction.RIGHT)
-                            self.set_state(self.STATE_OVERTAKING_RIGHT)
+                                self.change_lane(Direction.RIGHT)
+                                self.set_state(self.STATE_OVERTAKING_RIGHT)
                         elif index_left >= self.M:
-                            # front platoon after split meets M requirement, so split
-                            rear_platoon = self.split(index_left)
+                            if self.state == self.STATE_REQUEST_LEFT_VEHICLES_LANE_CHANGE and \
+                                    self.step - self.last_state_change_step < 100:
+                                pass
+                            else:
+                                # front platoon after split meets M requirement, so split
+                                rear_platoon = self.split(index_left)
 
-                            platoon_manager.add_platoon(rear_platoon)
+                                platoon_manager.add_platoon(rear_platoon)
 
-                            self.change_lane(Direction.LEFT)
-                            self.set_state(self.STATE_OVERTAKING_LEFT)
+                                self.change_lane(Direction.LEFT)
+                                self.set_state(self.STATE_OVERTAKING_LEFT)
+        self.step += 1
 
     def is_target_vehicle_gps_match(self, vid, v2v_response):
         v_data = get_par(vid, cc.PAR_SPEED_AND_ACCELERATION)
@@ -242,16 +263,12 @@ class Platoon:
 
             for v in leaders:
                 vid, dist = v
-                leader_lane_index = traci.vehicle.getLaneIndex(vid)
-                if leader_lane_index - lane_index == 1:
-                    if dist <= self.vehicle_length:
-                        vehicles.add(vid)
+                if dist <= self.vehicle_length:
+                    vehicles.add(vid)
             for v in followers:
                 vid, dist = v
-                follower_lane_index = traci.vehicle.getLaneIndex(vid)
-                if follower_lane_index - lane_index == 1:
-                    if dist <= self.vehicle_length:
-                        vehicles.add(vid)
+                if dist <= self.vehicle_length:
+                    vehicles.add(vid)
         return vehicles
 
     def get_right_lane_vehicles(self):
@@ -332,6 +349,44 @@ class Platoon:
                     return True
         return False
 
+    def get_v2v_vehicles_up_to_index(self, direction, v2v_response):
+        edge_id = traci.vehicle.getRoadID(self.vehicles[0])
+        lane_count = traci.edge.getLaneNumber(edge_id)
+        lane_index = traci.vehicle.getLaneIndex(self.vehicles[0])
+
+        vehicles = set()
+
+        if direction == Direction.LEFT and lane_index == lane_count - 1:
+            return 0, vehicles
+        if direction == Direction.RIGHT and lane_index == 0:
+            return 0, vehicles
+
+        for i, vid in enumerate(self.vehicles):
+            vehicles_frame = set()
+            if direction == Direction.LEFT:
+                leaders = traci.vehicle.getLeftLeaders(vid)
+                followers = traci.vehicle.getLeftFollowers(vid)
+            if direction == Direction.RIGHT:
+                leaders = traci.vehicle.getRightLeaders(vid)
+                followers = traci.vehicle.getRightFollowers(vid)
+
+            for v in leaders:
+                lid, dist = v
+                if dist <= self.vehicle_length:
+                    if not self.is_target_vehicle_gps_match(lid, v2v_response):
+                        return i, vehicles
+                    if self.is_target_vehicle_gps_match(lid, v2v_response):
+                        vehicles_frame.add(lid)
+            for v in followers:
+                fid, dist = v
+                if dist <= self.vehicle_length:
+                    if not self.is_target_vehicle_gps_match(fid, v2v_response):
+                        return i, vehicles
+                    if self.is_target_vehicle_gps_match(fid, v2v_response):
+                        vehicles_frame.add(fid)
+            vehicles.update(vehicles_frame)
+        return len(self.vehicles), vehicles
+
     def get_lane_change_split_index(self, direction):
         for i, vid in enumerate(self.vehicles):
             if not self.could_lane_change(vid, direction):
@@ -367,6 +422,8 @@ class Platoon:
         self.state = self.STATE_CRUISING
         self.vehicle_length = traci.vehicletype.getLength('PlatoonCar')
         self.min_gap = traci.vehicletype.getMinGap('PlatoonCar')
+        self.last_state_change_step = 0
+        self.step = 0
 
         # this is not a split platoon. it is a new platoon from scratch
         if "vehicles" not in kwargs:

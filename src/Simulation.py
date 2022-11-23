@@ -38,10 +38,12 @@ from Vehicle import vehicle_counter, Vehicle
 from PlatoonManager import platoon_manager
 from VehicleManager import vehicle_manager
 
+
 class Simulation:
 
     def __init__(self, run_time_seconds=60):
         self.run_time_seconds = run_time_seconds
+        self.step = 0
 
         # used to randomly color the vehicles
         random.seed(1)
@@ -70,7 +72,13 @@ class Simulation:
 
         min_gap = traci.vehicletype.getMinGap('V2V_Car')
 
-        add_vehicle(vid, vehicle_start_position, vehicle_start_lane, vehicle_start_speed, min_gap, type_id='V2V_Car')
+        if v2v:
+            color = (255, 0, 0)
+        else:
+            color = (0, 0, 255)
+
+        add_vehicle(vid, vehicle_start_position, vehicle_start_lane, vehicle_start_speed, min_gap, type_id='V2V_Car',
+                    color=color)
 
         set_par(vid, cc.PAR_ACTIVE_CONTROLLER, cc.ACC)
         set_par(vid, cc.PAR_CACC_SPACING, min_gap)
@@ -80,14 +88,14 @@ class Simulation:
         return vid
 
     def run(self):
-        step = 0
-        while running(step, self.run_time_seconds * 100):
+        self.step = 0
+        while running(self.step, self.run_time_seconds * 100):
             traci.simulationStep()
 
             platoon_manager.tick()
-            vehicle_manager.tick(step)
+            vehicle_manager.tick(self.step)
 
-            step += 1
+            self.step += 1
 
         traci.close()
         time.sleep(5)
