@@ -43,6 +43,7 @@ class Simulation:
 
     def __init__(self, run_time_seconds=60):
         self.run_time_seconds = run_time_seconds
+        self.step = 0
 
         # used to randomly color the vehicles
         random.seed(1)
@@ -87,14 +88,14 @@ class Simulation:
         return vid
 
     def run(self):
-        step = 0
-        while running(step, self.run_time_seconds * 100):
+        self.step = 0
+        while running(self.step, self.run_time_seconds * 100):
             traci.simulationStep()
 
             platoon_manager.tick()
-            vehicle_manager.tick(step)
+            vehicle_manager.tick(self.step)
 
-            step += 1
+            self.step += 1
 
         traci.close()
         time.sleep(5)
