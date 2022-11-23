@@ -355,10 +355,12 @@ class Platoon:
                 lid, dist = v
                 if dist <= self.vehicle_length:
                     # vehicles.add((lid, dist))
+                    pass
             for v in followers:
                 fid, dist = v
                 if dist <= self.vehicle_length:
                     # vehicles.add(fid)
+                    pass
         return len(self.vehicles)
 
     def get_lane_change_split_index(self, direction):
