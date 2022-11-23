@@ -401,10 +401,10 @@ def test_platoon_signals_multiple_neighbor_v2v_one_car_not_v2v_but_split_possibl
                 platoon.vehicle_length + platoon.min_gap),
         vehicle_start_lane=2, vehicle_start_speed=30, v2v=False)
     slow_vehicle_3 = simulation.add_vehicle(
-        vehicle_start_position=platoon_start_pos + 6 * (platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_position=platoon_start_pos + 7 * (platoon.vehicle_length + platoon.min_gap),
         vehicle_start_lane=1, vehicle_start_speed=30, v2v=True)
     slow_vehicle_4 = simulation.add_vehicle(
-        vehicle_start_position=platoon_start_pos + 4 * (platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_position=platoon_start_pos + 3 * (platoon.vehicle_length + platoon.min_gap),
         vehicle_start_lane=1, vehicle_start_speed=30, v2v=False)
 
     simulation.set_simulation_time_length(60)  # end simulation after 30 seconds

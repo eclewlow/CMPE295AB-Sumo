@@ -69,7 +69,7 @@ def change_lane(vid, lane):
 
 
 def add_vehicle(vid, position, lane, speed, cacc_spacing, real_engine=False, type_id='PlatoonCar',
-                car_follow_model='CC'):
+                car_follow_model='CC', color=None):
     """
     Adds a vehicle to the simulation
     :param vid: vehicle id to be set
@@ -96,9 +96,13 @@ def add_vehicle(vid, position, lane, speed, cacc_spacing, real_engine=False, typ
                 cc.CC_ENGINE_MODEL_REALISTIC)
         set_par(vid, cc.CC_PAR_VEHICLES_FILE, "vehicles.xml")
         set_par(vid, cc.CC_PAR_VEHICLE_MODEL, "alfa-147")
-    traci.vehicle.setColor(vid, (random.uniform(0, 255),
-                                 random.uniform(0, 255),
-                                 random.uniform(0, 255), 255))
+
+    if color is None:
+        color = (random.uniform(0, 255),
+                 random.uniform(0, 255),
+                 random.uniform(0, 255), 255)
+
+    traci.vehicle.setColor(vid, color)
 
 
 def get_distance(v1, v2):
