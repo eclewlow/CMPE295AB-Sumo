@@ -30,12 +30,6 @@ import random
 from utils import add_vehicle, set_par, change_lane, communicate, \
     get_distance, get_par, start_sumo, running
 
-if 'SUMO_HOME' in os.environ:
-    tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
-    sys.path.append(tools)
-else:
-    sys.exit("please declare environment variable 'SUMO_HOME'")
-
 import sumolib
 import traci
 
@@ -43,14 +37,6 @@ from Platoon import Platoon
 from Vehicle import vehicle_counter, Vehicle
 from PlatoonManager import platoon_manager
 from VehicleManager import vehicle_manager
-
-SUMO_PARAMS = ["--lateral-resolution", "0.8",
-               "--quit-on-end"]
-
-# sumo launch command
-sumoBinary = sumolib.checkBinary('sumo-gui')
-sumoCmd = [sumoBinary, "-D", "-c", "cfg/freeway_test.sumocfg"]
-
 
 class Simulation:
 
