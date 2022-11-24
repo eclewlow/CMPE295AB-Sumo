@@ -144,7 +144,7 @@ def test_three_vehicle_split(request):
     simulation.run()
 
 
-@pytest.mark.skip(reason="uncomment this to skip this test")
+# @pytest.mark.skip(reason="uncomment this to skip this test")
 def test_dangerous_situation(request):
     simulation = request.config.sim
 
