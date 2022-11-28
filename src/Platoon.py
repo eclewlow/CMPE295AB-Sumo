@@ -143,6 +143,11 @@ class Platoon():
                 self.set_state(PlatoonState.STATE_CRUISING)
 
         if leader is not None and not is_platoon_vehicle(leader):
+
+            if leader != self.leader:
+                # a new leader, so reset to cruising state
+                self.set_state(PlatoonState.STATE_CRUISING)
+
             # approach vehicle
             self.set_leader(leader)
 
