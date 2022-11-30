@@ -152,7 +152,7 @@ def start_sumo(config_file, already_running):
     :param already_running: if set to true then the command simply reloads
     the given config file, otherwise sumo is started from scratch
     """
-    arguments = ["--quit-on-end", "-c"]
+    arguments = ["-c"]
     sumo_cmd = [sumolib.checkBinary('sumo-gui')]
     # Print SUMO version
     os.system(sumolib.checkBinary('sumo'))
@@ -164,5 +164,14 @@ def start_sumo(config_file, already_running):
         traci.start(sumo_cmd, numRetries=10)
 
 
-def running(step, max_step):
+def running(step, seconds):
+    if seconds is None:
+        return True
+    max_step = seconds / traci.simulation.getDeltaT()
     return step <= max_step
+
+
+def running_distance(vid, distance):
+    if distance is None:
+        return True
+    return traci.vehicle.getDistance(vid) < distance

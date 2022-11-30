@@ -23,6 +23,7 @@ from utils import add_vehicle, set_par, change_lane, communicate, \
     get_distance, get_par, start_sumo, running
 import ccparams as cc
 
+
 class VehicleManager:
     def add_vehicle(self, vehicle):
         self.vehicles[vehicle.vid] = vehicle
@@ -48,5 +49,6 @@ class VehicleManager:
                 (v, a, u, x, y, t, _, _, _) = cc.unpack(vehicle_data)
                 v2v_response.append((vid, v, a, u, x, y, t))
         return v2v_response
+
 
 vehicle_manager = VehicleManager()

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2022-11-22 18:04:41.513311 by randomTrips.py UNKNOWN
+<configuration>
+    <end value="1000"/>
+    <length value="True"/>
+    <net-file value="test.net.xml"/>
+    <route-file value="map.rou.xml"/>
+    <validate value="True"/>
+</configuration>
+-->
+
+<!-- generated on 2022-11-22 18:04:41 by Eclipse SUMO duarouter Version 1.15.0
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/duarouterConfiguration.xsd">
+
+    <input>
+        <net-file value="test.net.xml"/>
+        <route-files value="trips.trips.xml"/>
+    </input>
+
+    <output>
+        <output-file value="map.rou.xml"/>
+        <alternatives-output value="NUL"/>
+    </output>
+
+
+
+    <time>
+        <begin value="0"/>
+        <end value="1000"/>
+    </time>
+
+    <report>
+        <no-warnings value="true"/>
+        <ignore-errors value="true"/>
+        <no-step-log value="true"/>
+    </report>
+
+</configuration>
+-->
+
+<routes>
+
+    <!-- Vehicle types -->
+    <vType id="Car" accel="2.9" decel="7.5" maxSpeed="44.4"
+           length="4.7" emissionClass="HBEFA3/PC" laneChangeModel="SL2015"
+           carFollowModel="Krauss" sigma="0.5" tau="1.8" minGap="2.5"
+           speedDev="0.1" speedFactor="1.2" vClass="passenger" lanesCount="3"
+           latAlignment="center"
+           color="100,149,237"/>
+    <vType id="NoGapCar" accel="2.9" decel="7.5" maxSpeed="30.0"
+           length="4.7" emissionClass="HBEFA3/PC" laneChangeModel="SL2015"
+           carFollowModel="Krauss" sigma="0.5" tau="1.8" minGap="2.5"
+           speedDev="0.0" speedFactor="1.0" vClass="passenger"
+           latAlignment="center"
+           color="100,149,237"/>
+    <vType id="Truck" accel="1.1" decel="4.0" maxSpeed="22.2"
+           length="16.5" emissionClass="HBEFA3/HDV" laneChangeModel="SL2015"
+           carFollowModel="Krauss" sigma="0.5" tau="1.8" minGap="2.5"
+           speedDev="0.1" speedFactor="1.2" vClass="trailer"
+           color="255,0,0"/>
+    <vType id="PlatoonCar" accel="2.9" decel="7.5" maxSpeed="44.4"
+           length="4.7" emissionClass="HBEFA3/PC" laneChangeModel="SL2015"
+           carFollowModel="CC" sigma="0.5" tau="1.0" minGap="5"
+           speedDev="0.1" speedFactor="1.2" vClass="passenger"
+           collisionMinGapFactor="0.5"
+           color="100,149,237" lanesCount="3"
+           omegaN="0.2" xi="1" c1="0.5"
+           ploegKp="0.2" ploegKd="0.7" ploegH="0.5"/>
+    <vType id="V2V_Car" accel="2.9" decel="7.5" maxSpeed="22.2"
+           length="4.7" emissionClass="HBEFA3/PC" laneChangeModel="SL2015"
+           carFollowModel="CC" sigma="0.5" tau="1.8" minGap="5"
+           speedDev="0.1" speedFactor="1.2" vClass="passenger"
+           collisionMinGapFactor="0.5"
+           lanesCount="3"
+           latAlignment="center"
+           color="100,149,237"/>
+    <vType id="V2V_Car_backup" accel="16" decel="12" maxSpeed="50"
+           length="4.7" emissionClass="HBEFA3/PC" laneChangeModel="SL2015"
+           carFollowModel="CC" sigma="0.5" tau="1.0" minGap="0"
+           speedDev="0.1" speedFactor="1.2" vClass="passenger"
+           color="100,149,237" lanesCount="3"
+           omegaN="0.2" xi="1" c1="0.5"
+           ploegKp="0.2" ploegKd="0.7" ploegH="0.5" ccAccel="10">
+    </vType>
+    <!-- Routes -->
+    <route id="freeway" edges="freeway exit"/>
+    <route id="main" edges="freeway exit"/>
+</routes>

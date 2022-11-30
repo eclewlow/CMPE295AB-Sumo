@@ -46,7 +46,7 @@ class PlatoonState(Enum):
 class Platoon():
     DEFAULT_LANE = 2
     # minimum platoon length for split - lane change maneuver
-    M = 3
+    M = 1
     # cruising speed
     SPEED = 130 / 3.6
 
@@ -224,6 +224,7 @@ class Platoon():
                             self.set_state(PlatoonState.STATE_OVERTAKING_LEFT)
                         # check if we can signal other cars to move
                         elif left_lane_vehicles_index >= self.M and len(left_lane_vehicles) > 0:
+                            just_ids = list(t[0] for t in v2v_response)
                             for vid in left_lane_vehicles:
                                 v2v.request_lane_change_maneuver(self.vehicles[0], vid)
                             self.set_state(PlatoonState.STATE_REQUEST_LEFT_VEHICLES_LANE_CHANGE)
@@ -254,8 +255,9 @@ class Platoon():
         v_data = get_par(vid, cc.PAR_SPEED_AND_ACCELERATION)
         (target_v, target_a, target_u, target_x, target_y, target_t, _, _, _) = cc.unpack(v_data)
         for vehicle_data in v2v_response:
-            (vid, v, a, u, x, y, t) = vehicle_data
-            if math.sqrt((target_x - x) ** 2 + (target_y - y) ** 2) <= 1:
+            (vid2, v, a, u, x, y, t) = vehicle_data
+            if math.sqrt((target_x - x) ** 2 + (target_y - y) ** 2) <= 0.1:
+                print(vid + " = " + vid2)
                 return True
 
         return False

@@ -28,7 +28,7 @@ from collections import defaultdict
 import ccparams as cc
 import random
 from utils import add_vehicle, set_par, change_lane, communicate, \
-    get_distance, get_par, start_sumo, running
+    get_distance, get_par, start_sumo, running, running_distance
 
 import sumolib
 import traci
@@ -41,16 +41,21 @@ from VehicleManager import vehicle_manager
 
 class Simulation:
 
-    def __init__(self, run_time_seconds=60):
+    def __init__(self, run_time_seconds=None, platoon_run_distance=None):
+        self.platoon_run_distance = platoon_run_distance
         self.run_time_seconds = run_time_seconds
+
         self.step = 0
 
         # used to randomly color the vehicles
         random.seed(1)
-        start_sumo("cfg/freeway_test.sumocfg", False)
+        start_sumo("cfg/map.sumocfg", False)
 
     def set_simulation_time_length(self, length):
         self.run_time_seconds = length
+
+    def set_simulation_platoon_run_distance(self, distance):
+        self.platoon_run_distance = distance
 
     def track_vehicle(self, vid):
         traci.gui.trackVehicle("View #0", vid)
@@ -83,19 +88,26 @@ class Simulation:
         set_par(vid, cc.PAR_ACTIVE_CONTROLLER, cc.ACC)
         set_par(vid, cc.PAR_CACC_SPACING, min_gap)
 
-        vehicle_manager.add_vehicle(Vehicle(vid, commands, v2v=v2v))
+        vehicle_manager.add_vehicle(Vehicle(vid, commands=commands, v2v=v2v))
 
         return vid
 
     def run(self):
         self.step = 0
-        while running(self.step, self.run_time_seconds * 100):
+
+        last_platoon_vehicle = platoon_manager.get_last_platoon_vehicle_id()
+        total_simulation_time = 0
+
+        while running(self.step, self.run_time_seconds) and running_distance(last_platoon_vehicle,
+                                                                             self.platoon_run_distance):
             traci.simulationStep()
 
             platoon_manager.tick()
             vehicle_manager.tick(self.step)
 
             self.step += 1
+            total_simulation_time = traci.simulation.getTime()
 
         traci.close()
         time.sleep(5)
+        return total_simulation_time

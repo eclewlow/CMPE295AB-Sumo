@@ -18,6 +18,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
+import traci
+
 
 class PlatoonManager:
     def add_platoon(self, platoon):
@@ -32,6 +34,14 @@ class PlatoonManager:
 
     def __init__(self, *args, **kwargs):
         self.platoons = list()
+
+    def get_last_platoon_vehicle_id(self):
+        last_vehicle = None
+        for p in self.platoons:
+            for vid in p.vehicles:
+                if last_vehicle is None or traci.vehicle.getDistance(vid) < traci.vehicle.getDistance(last_vehicle):
+                    last_vehicle = vid
+        return last_vehicle
 
 
 platoon_manager = PlatoonManager()

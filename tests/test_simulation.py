@@ -102,20 +102,32 @@ def test_unable_to_split(request):
     simulation.run()
 
 
-@pytest.mark.skip(reason="uncomment this to skip this test")
+# @pytest.mark.skip(reason="uncomment this to skip this test")
 def test_four_vehicle_split(request):
     simulation = request.config.sim
 
-    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=50,
+    platoon_vehicle_length = traci.vehicletype.getLength('PlatoonCar')
+    platoon_min_gap = traci.vehicletype.getMinGap('PlatoonCar')
+    platoon_start_pos = 7 * (platoon_vehicle_length + platoon_min_gap)
+
+    platoon = simulation.add_platoon(platoon_length=6, platoon_start_position=platoon_start_pos,
                                      platoon_start_lane=Platoon.DEFAULT_LANE,
                                      platoon_desired_speed=50)
 
-    slow_vehicle_1 = simulation.add_vehicle(vehicle_start_position=13 * (platoon.vehicle_length + platoon.min_gap),
-                                            vehicle_start_lane=1, vehicle_start_speed=30)
-    slow_vehicle_2 = simulation.add_vehicle(vehicle_start_position=19 * (platoon.vehicle_length + platoon.min_gap),
-                                            vehicle_start_lane=2, vehicle_start_speed=30)
+    slow_vehicle_1 = simulation.add_vehicle(
+        vehicle_start_position=platoon_start_pos + 13 * (platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_lane=0, vehicle_start_speed=30)
+    slow_vehicle_1 = simulation.add_vehicle(
+        vehicle_start_position=platoon_start_pos + 13 * (platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_lane=1, vehicle_start_speed=30)
+    slow_vehicle_2 = simulation.add_vehicle(
+        vehicle_start_position=platoon_start_pos + 19 * (platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_lane=2, vehicle_start_speed=30)
+    slow_vehicle_1 = simulation.add_vehicle(
+        vehicle_start_position=platoon_start_pos + 13 * (platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_lane=3, vehicle_start_speed=30)
 
-    simulation.set_simulation_time_length(30)  # end simulation after 30 seconds
+    simulation.set_simulation_time_length(60)  # end simulation after 30 seconds
 
     simulation.set_zoom(20000)
     simulation.track_vehicle(slow_vehicle_2)
@@ -478,3 +490,88 @@ def test_platoon_requires_split(request):
     simulation.track_vehicle(platoon.vehicles[0])
 
     simulation.run()
+
+
+def test_platoon_signals_multiple_neighbor_v2v2(request):
+    simulation = request.config.sim
+
+    platoon_vehicle_length = traci.vehicletype.getLength('PlatoonCar')
+    platoon_min_gap = traci.vehicletype.getMinGap('PlatoonCar')
+    platoon_start_pos = 7 * (platoon_vehicle_length + platoon_min_gap)
+
+    platoon = simulation.add_platoon(platoon_length=6,
+                                     platoon_start_position=platoon_start_pos,
+                                     platoon_start_lane=2,
+                                     platoon_desired_speed=50)
+
+    slow_vehicle_1 = simulation.add_vehicle(
+        vehicle_start_position=platoon_start_pos + 6 * (platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_lane=3, vehicle_start_speed=35, v2v=False)
+    slow_vehicle_2 = simulation.add_vehicle(
+        vehicle_start_position=platoon_start_pos + 11 * (
+                platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_lane=2, vehicle_start_speed=30, v2v=False)
+    slow_vehicle_3 = simulation.add_vehicle(
+        vehicle_start_position=platoon_start_pos + 6 * (platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_lane=1, vehicle_start_speed=35, v2v=False)
+    slow_vehicle_4 = simulation.add_vehicle(
+        vehicle_start_position=platoon_start_pos + 4 * (platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_lane=1, vehicle_start_speed=40, v2v=False)
+
+    simulation.set_simulation_time_length(60)  # end simulation after 30 seconds
+
+    simulation.set_zoom(20000)
+    simulation.track_vehicle(platoon.vehicles[0])
+
+    simulation.run()
+
+
+def test_platoon_with_random_traffic(request):
+    simulation = request.config.sim
+
+    platoon_vehicle_length = traci.vehicletype.getLength('PlatoonCar')
+    platoon_min_gap = traci.vehicletype.getMinGap('PlatoonCar')
+    platoon_start_pos = 7 * (platoon_vehicle_length + platoon_min_gap)
+
+    platoon = simulation.add_platoon(platoon_length=6,
+                                     platoon_start_position=platoon_start_pos,
+                                     platoon_start_lane=2,
+                                     platoon_desired_speed=27.8)
+
+    car_vehicle_length = traci.vehicletype.getLength('V2V_Car')
+    car_min_gap = traci.vehicletype.getMinGap('V2V_Car')
+
+    lane_count = 3
+    how_many_cars_long = 100
+
+    import random
+    from datetime import datetime
+
+    # Random number with system time
+    random.seed(datetime.now())
+
+    new_list = [(x, y) for x in range(lane_count) for y in range(how_many_cars_long)]
+    random.shuffle(new_list)
+
+    for i in range(0, 50):
+        start_lane, start_position = new_list[i]
+        simulation.add_vehicle(
+            vehicle_start_position=platoon_start_pos + 6 * (
+                    platoon.vehicle_length + platoon.min_gap) + start_position * 2 * (
+                                           car_vehicle_length + car_min_gap),
+            vehicle_start_lane=start_lane, vehicle_start_speed=22.2, v2v=random.choice([True, False]))
+        # simulation.add_vehicle(
+        #     vehicle_start_position=platoon_start_pos + 6 * (
+        #             platoon.vehicle_length + platoon.min_gap) + start_position * (
+        #                                    2 * car_vehicle_length + car_min_gap),
+        #     vehicle_start_lane=start_lane, vehicle_start_speed=30, v2v=random.choice([True, False]))
+
+    # simulation.set_simulation_time_length(60)  # end simulation after 30 seconds
+    simulation.set_simulation_platoon_run_distance(3200)
+
+    simulation.set_zoom(20000)
+    simulation.track_vehicle(platoon.vehicles[0])
+
+    total_simulation_time = simulation.run()
+
+    print(total_simulation_time)

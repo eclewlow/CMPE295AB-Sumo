@@ -887,6 +887,6 @@
         </polys>
         <legend showSizeLegend="1" showColorLegend="0"/>
     </scheme>
-    <viewport y="42" x="-24811.8" zoom="19330.8" angle="82"/>
+    <viewport y="42" x="-24811.8" zoom="19330.8"/>
     <delay value="1900"/>
 </viewsettings>
