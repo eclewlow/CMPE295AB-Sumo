@@ -15,13 +15,12 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
 
-import sys
+import math
 import os
-import time
+import random
+import sys
 
 import ccparams as cc
-import random
-import math
 
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')

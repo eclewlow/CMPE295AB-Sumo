@@ -19,27 +19,23 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
 
-import os
-import sys
-import time
-import matplotlib.pyplot as plt
-from collections import defaultdict
-
-import ccparams as cc
 import random
-from utils import add_vehicle, set_par, change_lane, communicate, \
-    get_distance, get_par, start_sumo, running, running_distance
+import time
 
-import sumolib
 import traci
 
+import ccparams as cc
 from Platoon import Platoon
-from Vehicle import vehicle_counter, Vehicle
 from PlatoonManager import platoon_manager
+from Vehicle import vehicle_counter, Vehicle
 from VehicleManager import vehicle_manager
+from utils import add_vehicle, set_par, start_sumo, running, running_distance
 
 
 class Simulation:
+    """
+    Simulation class for encapsulating a simulation and making it configurable
+    """
 
     def __init__(self, run_time_seconds=None, platoon_run_distance=None):
         self.platoon_run_distance = platoon_run_distance
@@ -52,19 +48,47 @@ class Simulation:
         start_sumo("cfg/map.sumocfg", False)
 
     def set_simulation_time_length(self, length):
+        """
+        Set the amount of time the simulation should run for
+
+        :param length: the time length in seconds
+        """
         self.run_time_seconds = length
 
     def set_simulation_platoon_run_distance(self, distance):
+        """
+        Set the distance the platoon should travel at which point the simulation will end
+
+        :param distance: the distance in meters
+        """
         self.platoon_run_distance = distance
 
     def track_vehicle(self, vid):
+        """
+        Track the given vehicle in the Sumo GUI
+
+        :param vid: the target vehicle's traci vehicle id
+        """
         traci.gui.trackVehicle("View #0", vid)
 
     def set_zoom(self, zoom=20000):
+        """
+        Set the zoom for the Sumo GUI
+
+        :param zoom: the zoom value to set
+        """
         traci.gui.setZoom("View #0", zoom)
 
     def add_platoon(self, platoon_length=6, platoon_start_position=50, platoon_start_lane=Platoon.DEFAULT_LANE,
                     platoon_desired_speed=Platoon.SPEED):
+        """
+        Function to add a platoon to the simulation
+
+        :param platoon_length: the length of the platoon
+        :param platoon_start_position: the start position of the platoon
+        :param platoon_start_lane: the start_lane of the platoon
+        :param platoon_desired_speed: the desired speed of the platoon
+        """
         platoon = Platoon(n=platoon_length, pos=platoon_start_position, lane=platoon_start_lane,
                           speed=platoon_desired_speed)
         platoon_manager.add_platoon(platoon)
@@ -73,6 +97,15 @@ class Simulation:
 
     def add_vehicle(self, vehicle_start_position=0, vehicle_start_lane=Vehicle.DEFAULT_SLOW_LANE,
                     vehicle_start_speed=Vehicle.DEFAULT_SLOW_SPEED, v2v=False, commands=dict()):
+        """
+        Function to add a vehicle to the simulation
+
+        :param vehicle_start_position: the start position of the vehicle
+        :param vehicle_start_lane: the start_lane of the vehicle
+        :param vehicle_start_speed: the desired speed of the vehicle
+        :param v2v: whether the vehicle is equipped with V2V
+        :param commands: a dictionary of commands to execute during the simulation
+        """
         vid = vehicle_counter.get_next_vehicle_id()
 
         min_gap = traci.vehicletype.getMinGap('V2V_Car')
@@ -93,6 +126,9 @@ class Simulation:
         return vid
 
     def run(self):
+        """
+        The main execution loop for the simulation
+        """
         self.step = 0
 
         last_platoon_vehicle = platoon_manager.get_last_platoon_vehicle_id()

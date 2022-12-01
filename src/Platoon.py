@@ -19,22 +19,23 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
 
-import ccparams as cc
-from utils import add_vehicle, set_par, change_lane, communicate, \
-    get_distance, get_par, start_sumo, running
 import math
-import time
-
-from Vehicle import vehicle_counter, is_platoon_vehicle, Vehicle
-from Direction import Direction
-from V2V import v2v
+from enum import Enum, auto
 
 import traci
+
+import ccparams as cc
+from Direction import Direction
 from PlatoonManager import platoon_manager
-from enum import Enum, auto
+from V2V import v2v
+from Vehicle import vehicle_counter, is_platoon_vehicle
+from utils import add_vehicle, set_par, change_lane, get_distance, get_par
 
 
 class PlatoonState(Enum):
+    """
+    Class for Platoon state
+    """
     STATE_CRUISING = auto()
     STATE_OVERTAKING_RIGHT = auto()
     STATE_OVERTAKING_LEFT = auto()
@@ -44,6 +45,9 @@ class PlatoonState(Enum):
 
 
 class Platoon():
+    """
+    Class which encapsulates the functionality of a Platoon
+    """
     DEFAULT_LANE = 2
     # minimum platoon length for split - lane change maneuver
     M = 1
@@ -51,9 +55,17 @@ class Platoon():
     SPEED = 130 / 3.6
 
     def get_length(self):
+        """
+        Get the number of vehicles in the platoon - the platoon length
+        """
         return len(self.vehicles)
 
     def change_lane(self, direction):
+        """
+        Changes the lane of the entire platoon in the given direction
+
+        :param direction: the direction to change lanes
+        """
         lane = self.get_lane()
         destination_lane = lane + direction
 
@@ -61,14 +73,27 @@ class Platoon():
             change_lane(vid, destination_lane)
 
     def get_lane(self):
+        """
+        Return the current lane index that the platoon is driving in
+        """
         return traci.vehicle.getLaneIndex(self.vehicles[0])
 
     def set_desired_speed(self, speed):
+        """
+        Set the desired speed of the platoon leader, and thus the entire platoon
+
+        :param speed: the desired speed to set
+        """
         self.desired_speed = speed
         set_par(self.vehicles[0], cc.PAR_CC_DESIRED_SPEED, speed)
         set_par(self.vehicles[0], cc.PAR_ACTIVE_CONTROLLER, cc.ACC)
 
     def get_leader(self, radar_front_distance=160):
+        """
+        Get the vehicle that is driving in front of the platoon within the radar distance
+
+        :param radar_front_distance: the front radar distance of the platoon
+        """
         vehicle = traci.vehicle.getLeader(self.vehicles[0], radar_front_distance)
         if vehicle is not None:
             # simulate real radar distance
@@ -77,6 +102,11 @@ class Platoon():
         return None, None
 
     def set_leader(self, leader):
+        """
+        Set the leader of the platoon which this platoon should adjust its ACC to
+
+        :param leader: the vehicle id of the leading vehicle to set to
+        """
         self.leader = leader
         if leader is None:
             self.set_desired_speed(self.desired_speed)
@@ -84,6 +114,9 @@ class Platoon():
             set_par(self.vehicles[0], cc.PAR_ACTIVE_CONTROLLER, cc.FAKED_CACC)
 
     def communicate(self):
+        """
+        Update inter vehicular data for cooperative adaptive cruise control settings for making platooning possible
+        """
         for i, vid in enumerate(self.vehicles):
             if i == 0:
                 if self.leader is None:
@@ -111,10 +144,18 @@ class Platoon():
             set_par(vid, cc.PAR_FRONT_FAKE_DATA, cc.pack(f_v, f_u, f_d))
 
     def set_state(self, state):
+        """
+        Update state of the platoon
+
+        :param state: the new state to be changed to
+        """
         self.last_state_change_step = self.step
         self.state = state
 
     def tick(self):
+        """
+        Run these commands every simulation step
+        """
         # update cacc values
         self.communicate()
 
@@ -252,6 +293,13 @@ class Platoon():
         self.step += 1
 
     def is_target_vehicle_gps_match(self, vid, v2v_response):
+        """
+        Check against the v2v response if the target vehicle id is within our v2v response - which means that
+        the target vehicle is v2v enabled.
+
+        :param vid: the target vehicle
+        :param v2v_response: the response package of v2v equipped vehicle's GPS data
+        """
         v_data = get_par(vid, cc.PAR_SPEED_AND_ACCELERATION)
         (target_v, target_a, target_u, target_x, target_y, target_t, _, _, _) = cc.unpack(v_data)
         for vehicle_data in v2v_response:
@@ -263,6 +311,12 @@ class Platoon():
         return False
 
     def are_target_vehicles_gps_match(self, vlist, v2v_response):
+        """
+        Check if all target vehicles are v2v equipped.
+
+        :param vlist: a list of target vehicles
+        :param v2v_response: the response package of v2v equipped vehicle's GPS data
+        """
         result = True
         if len(vlist) == 0:
             return False
@@ -271,6 +325,9 @@ class Platoon():
         return result
 
     def get_left_lane_vehicles(self):
+        """
+        Returns a list of all vehicles in the left lane relative to this platoon's traveling lane
+        """
         edge_id = traci.vehicle.getRoadID(self.vehicles[0])
         lane_index = traci.vehicle.getLaneIndex(self.vehicles[0])
         lane_count = traci.edge.getLaneNumber(edge_id)
@@ -295,9 +352,11 @@ class Platoon():
         return vehicles
 
     def get_right_lane_vehicles(self):
+        """
+        Returns a list of all vehicles in the left lane relative to this platoon's traveling lane
+        """
         edge_id = traci.vehicle.getRoadID(self.vehicles[0])
         lane_index = traci.vehicle.getLaneIndex(self.vehicles[0])
-        lane_count = traci.edge.getLaneNumber(edge_id)
 
         vehicles = set()
 
@@ -323,6 +382,12 @@ class Platoon():
         return vehicles
 
     def could_lane_change(self, vid, direction):
+        """
+        Returns whether a there is sufficient room for a given platoon member to change lanes in the given direction
+
+        :param vid: the traci vehicle id of the platoon member
+        :param direction: the direction to change lanes in
+        """
         edge_id = traci.vehicle.getRoadID(vid)
         lane_count = traci.edge.getLaneNumber(edge_id)
         lane_index = traci.vehicle.getLaneIndex(vid)
@@ -350,12 +415,23 @@ class Platoon():
         return True
 
     def get_speed(self):
+        """
+        Returns the speed of the platoon leader
+        """
         return traci.vehicle.getSpeed(self.vehicles[0])
 
     def get_total_length(self):
+        """
+        Returns the length in meters of the platoon
+        """
         return self.get_length() * (self.vehicle_length + self.min_gap) - self.min_gap
 
     def vehicle_to_overtake_exists(self, direction):
+        """
+        Returns true if there is a vehicle diagonally ahead of the platoon in the given direction
+
+        :param direction: the direction in which to check diagonally for a vehicle
+        """
         edge_id = traci.vehicle.getRoadID(self.vehicles[0])
         lane_count = traci.edge.getLaneNumber(edge_id)
         lane_index = traci.vehicle.getLaneIndex(self.vehicles[0])
@@ -373,6 +449,15 @@ class Platoon():
         return False
 
     def get_v2v_vehicles_up_to_index(self, direction, v2v_response):
+        """
+        Returns the index within the platoon in which there are only v2v enabled vehicles in the given direction
+
+        :param direction: the direction to which to check for v2v enabled vehicles
+        :param v2v_response: the v2v response with vehicle GPS information
+
+        :return: a tuple containing (1) the maximum index into the platoon for which there appear only v2v enabled
+        vehicles in the given direction and (2) a list of traci vehicle ids for those adjacent v2v enabled vehicles
+        """
         edge_id = traci.vehicle.getRoadID(self.vehicles[0])
         lane_count = traci.edge.getLaneNumber(edge_id)
         lane_index = traci.vehicle.getLaneIndex(self.vehicles[0])
@@ -411,12 +496,24 @@ class Platoon():
         return len(self.vehicles), vehicles
 
     def get_lane_change_split_index(self, direction):
+        """
+        Returns the index within the platoon in which the platoon can split and change lanes.
+
+        :param direction: the direction in which to check for lane change availability
+        :return: the maximum index into the platoon for which there is space for a conditional split and lane change
+        maneuver
+        """
         for i, vid in enumerate(self.vehicles):
             if not self.could_lane_change(vid, direction):
                 return i
         return len(self.vehicles)
 
     def split(self, i):
+        """
+        Splits the platoon at index i into two platoons: i.e. (0, i-1) and (i, last_platoon_member_index)
+
+        :return: the Platoon behind that was created after the split
+        """
         rear_vehicles = self.vehicles[i:]
         front_vehicles = self.vehicles[:i]
 
@@ -425,6 +522,14 @@ class Platoon():
         return Platoon(speed=self.desired_speed, vehicles=rear_vehicles)
 
     def build(self, n=6, pos=0, speed=SPEED, lane=DEFAULT_LANE):
+        """
+        Builds a platoon of (n) vehicles at a given speed, position, and lane.
+
+        :param n: the number of vehicles in the platoon
+        :param pos: the starting position of the platoon in meters
+        :param speed: the starting speed of the platoon in meters/second
+        :param lane: the starting lane of the platoon
+        """
         for i in range(n):
             vid = vehicle_counter.get_next_platoon_vehicle_id()
             self.vehicles.append(vid)

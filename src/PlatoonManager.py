@@ -22,20 +22,38 @@ import traci
 
 
 class PlatoonManager:
+    """
+    Class to manage platoons and simulation step for all platoons
+    """
     def add_platoon(self, platoon):
+        """
+        Add a platoon for the PlatoonManger to manage
+
+        :param platoon: the platoon to be managed
+        """
         self.platoons.append(platoon)
 
     def tick(self):
+        """
+        Run a single step for all the platoons that the PlatoonManager is managing
+        """
         for p in self.platoons:
             p.tick()
 
     def reset(self):
+        """
+        Clear the current list of platoons managed by the PlatoonManager
+        """
         self.platoons = list()
 
     def __init__(self, *args, **kwargs):
         self.platoons = list()
 
     def get_last_platoon_vehicle_id(self):
+        """
+        Returns the traci vehicle id of the last platoon member within the fleet of platoons managed by this
+        PlatoonManager
+        """
         last_vehicle = None
         for p in self.platoons:
             for vid in p.vehicles:

@@ -19,22 +19,29 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
 
+from enum import auto
+
 import ccparams as cc
-from utils import add_vehicle, set_par, change_lane, communicate, \
-    get_distance, get_par, start_sumo, running
-
 from VehicleManager import vehicle_manager
-
-from enum import Enum, auto
+from utils import get_par
 
 
 class V2V:
+    """
+    A class that facilitates V2V message transmission
+    """
+
     def __init__(self, *args, **kwargs):
         pass
 
     V2V_LANE_CHANGE_MANEUVER_REQUEST = auto()
 
     def request_coordinates(self):
+        """
+        Simulates a V2V message broadcast sent to all vehicles requesting for GPS information
+
+        :return: a list of vehicular information, including coordinates, speed, and acceleration
+        """
         response = list()
         for vid, vehicle in vehicle_manager.vehicles.items():
             if vehicle.v2v:
@@ -44,6 +51,12 @@ class V2V:
         return response
 
     def request_lane_change_maneuver(self, sender_id, recipient_id):
+        """
+        Simulates a V2V message targeted at a given recipient requesting that the recipient changes lanes.
+
+        :param sender_id: the originator of the request
+        :param recipient_id: the target recipient of the request
+        """
         recipient = vehicle_manager.get_vehicle(recipient_id)
         recipient.receive_v2v_request(sender_id, self.V2V_LANE_CHANGE_MANEUVER_REQUEST)
 
