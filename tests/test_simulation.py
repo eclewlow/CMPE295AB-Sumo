@@ -564,11 +564,6 @@ def test_platoon_with_random_traffic(request):
                     platoon.vehicle_length + platoon.min_gap) + start_position * 2 * (
                                            car_vehicle_length + car_min_gap),
             vehicle_start_lane=start_lane, vehicle_start_speed=22.2, v2v=random.choice([True, False]))
-        # simulation.add_vehicle(
-        #     vehicle_start_position=platoon_start_pos + 6 * (
-        #             platoon.vehicle_length + platoon.min_gap) + start_position * (
-        #                                    2 * car_vehicle_length + car_min_gap),
-        #     vehicle_start_lane=start_lane, vehicle_start_speed=30, v2v=random.choice([True, False]))
 
     # simulation.set_simulation_time_length(60)  # end simulation after 30 seconds
     simulation.set_simulation_platoon_run_distance(3200)
@@ -579,3 +574,59 @@ def test_platoon_with_random_traffic(request):
     total_simulation_time = simulation.run()
 
     print(total_simulation_time)
+
+
+def test_platoon_with_random_traffic_non_v2v(request):
+    simulation = request.config.sim
+
+    platoon_vehicle_length = traci.vehicletype.getLength('PlatoonCar')
+    platoon_min_gap = traci.vehicletype.getMinGap('PlatoonCar')
+    platoon_start_pos = 10 * (platoon_vehicle_length + platoon_min_gap)
+
+    platoon = simulation.add_platoon(platoon_length=6,
+                                     platoon_start_position=platoon_start_pos,
+                                     platoon_start_lane=2,
+                                     platoon_desired_speed=50)
+
+    slow_vehicle_2 = simulation.add_vehicle(
+        vehicle_start_position=platoon_start_pos + 15 * (
+                platoon.vehicle_length + platoon.min_gap),
+        vehicle_start_lane=2, vehicle_start_speed=30, v2v=False)
+
+    import random
+
+    for y in range(1, 600):
+        slow_vehicle_y = simulation.add_vehicle(
+            vehicle_start_position=20 + (3 * y) * (platoon.vehicle_length + platoon.min_gap),
+            vehicle_start_lane=0, vehicle_start_speed=random.randint(25, 45), v2v=False)
+        slow_vehicle_y = simulation.add_vehicle(
+            vehicle_start_position=20 + (5 * y) * (platoon.vehicle_length + platoon.min_gap),
+            vehicle_start_lane=0, vehicle_start_speed=random.randint(25, 45), v2v=False)
+        slow_vehicle_3y = simulation.add_vehicle(
+            vehicle_start_position=20 + (2 * y) * (platoon.vehicle_length + platoon.min_gap),
+            vehicle_start_lane=1, vehicle_start_speed=random.randint(30, 45), v2v=False)
+        slow_vehicle_y = simulation.add_vehicle(
+            vehicle_start_position=20 + (5 * y) * (platoon.vehicle_length + platoon.min_gap),
+            vehicle_start_lane=1, vehicle_start_speed=random.randint(25, 40), v2v=False)
+        slow_vehicle_3y = simulation.add_vehicle(
+            vehicle_start_position=20 + (6 * y) * (platoon.vehicle_length + platoon.min_gap),
+            vehicle_start_lane=3, vehicle_start_speed=random.randint(30, 40), v2v=False)
+        """slow_vehicle_y = simulation.add_vehicle(
+            vehicle_start_position=20 + (3 * y) * (platoon.vehicle_length + platoon.min_gap),
+            vehicle_start_lane=3, vehicle_start_speed=random.randint(25, 40), v2v=False)"""
+        slow_vehicle_3y = simulation.add_vehicle(
+            vehicle_start_position=20 + (4 * y) * (platoon.vehicle_length + platoon.min_gap),
+            vehicle_start_lane=4, vehicle_start_speed=random.randint(30, 40), v2v=False)
+        """slow_vehicle_y = simulation.add_vehicle(
+            vehicle_start_position=platoon_start_pos + ( 17* y) * (platoon.vehicle_length + platoon.min_gap),
+            vehicle_start_lane=2, vehicle_start_speed=random.randint(25, 40), v2v=False)"""
+        slow_vehicle_3y = simulation.add_vehicle(
+            vehicle_start_position=platoon_start_pos + (12 * y) * (platoon.vehicle_length + platoon.min_gap),
+            vehicle_start_lane=0, vehicle_start_speed=random.randint(30, 35), v2v=False)
+
+    simulation.set_simulation_platoon_run_distance(10000)
+
+    simulation.set_zoom(20000)
+    simulation.track_vehicle(platoon.vehicles[0])
+
+    simulation.run()
