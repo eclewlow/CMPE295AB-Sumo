@@ -50,7 +50,7 @@ class Platoon():
     """
     DEFAULT_LANE = 2
     # minimum platoon length for split - lane change maneuver
-    M = 1
+    M = 3
     # cruising speed
     SPEED = 130 / 3.6
 
